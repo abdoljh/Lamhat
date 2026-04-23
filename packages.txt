@@ -1,0 +1,8 @@
+libgl1
+libglib2.0-0t64
+libxrender1
+tesseract-ocr
+tesseract-ocr-ara
+ffmpeg
+fonts-hosny-amiri
+poppler-utils

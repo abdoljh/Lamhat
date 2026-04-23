@@ -1,1 +1,43 @@
-streamlit
+# ── Arabic Book Brief Engine — Phase 1 ────────────────────────────────
+# Streamlit Community Cloud reads requirements.txt from the repo root.
+
+# Core UI
+streamlit>=1.35.0
+
+# PDF extraction
+PyMuPDF>=1.24.0
+pdf2image>=1.17.0        # poppler-based rendering for scanned pages (full MediaBox)
+
+# Arabic text correction
+arabic-reshaper>=3.0.0
+python-bidi>=0.6.0
+
+# OCR — scanned PDFs
+# Tesseract: lightweight, fits Streamlit Cloud 1 GB RAM limit.
+#   System packages in packages.txt: tesseract-ocr + tesseract-ocr-ara
+pytesseract>=0.3.10
+# EasyOCR: good accuracy but needs ~1 GB RAM (PyTorch) — local use only:
+# easyocr>=1.7.1
+# PaddleOCR: best Arabic accuracy but no Python 3.14 wheels — local only:
+# paddlepaddle>=2.6.0
+# paddleocr>=2.7.0
+# Tesseract (lightweight, needs system tesseract-ocr + arabic language pack):
+# pytesseract>=0.3.10
+#
+# Shared image utilities used by all backends:
+Pillow>=10.0.0
+numpy>=1.24.0
+
+# Diacritization (applied only to final script, not raw OCR text)
+# Mishkal: local, no API cost, good for clean MSA text.
+# farasapy: higher accuracy but requires Java — local dev only.
+mishkal
+# farasapy>=0.1.1
+
+# LLM summarization & script generation
+anthropic>=0.40.0
+
+# ── Phase 2 — Audio Generation ──────────────────────────────────────────
+# TTS backends
+gTTS>=2.5.0            # free Google TTS fallback (development use, lang='ar')
+# elevenlabs>=1.0.0    # premium Arabic voices — install locally when needed

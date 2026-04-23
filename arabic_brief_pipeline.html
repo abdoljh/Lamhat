@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Arabic Book Brief — Automated Pipeline</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0e0e0e;
+    --paper: #f5f0e8;
+    --sand: #e8dfcc;
+    --gold: #c9a84c;
+    --gold-light: #f0d98a;
+    --rust: #b94f2a;
+    --teal: #1e6b6b;
+    --teal-light: #e0f0ef;
+    --text: #1a1a1a;
+    --muted: #6b6355;
+    --rule: #ccc4b0;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    padding: 0 0 80px 0;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* grain overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0; opacity: .4;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 52px 60px 44px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::after {
+    content: '📖';
+    position: absolute; right: 60px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 96px; opacity: .08;
+  }
+  .header-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--gold);
+    margin-bottom: 14px;
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 4vw, 48px);
+    line-height: 1.15; font-weight: 700;
+    max-width: 720px;
+  }
+  header h1 em { font-style: italic; color: var(--gold-light); }
+  .header-sub {
+    margin-top: 16px; max-width: 580px;
+    color: #b0a898; font-size: 14px; line-height: 1.7;
+  }
+  .header-badges {
+    margin-top: 24px; display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .badge {
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    letter-spacing: .12em; text-transform: uppercase;
+    padding: 5px 12px; border-radius: 2px;
+    border: 1px solid;
+  }
+  .badge-gold  { border-color: var(--gold);  color: var(--gold); }
+  .badge-teal  { border-color: #4aadad; color: #4aadad; }
+  .badge-rust  { border-color: #d97452; color: #d97452; }
+
+  /* ── MAIN GRID ── */
+  .main { max-width: 1100px; margin: 0 auto; padding: 0 40px; position: relative; z-index: 1; }
+
+  /* section title */
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--muted); margin: 56px 0 24px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
+
+  /* ── PIPELINE FLOW ── */
+  .pipeline {
+    display: flex; flex-direction: column; gap: 0;
+  }
+  .pipe-phase {
+    display: grid; grid-template-columns: 80px 1fr;
+    gap: 0 28px;
+    position: relative;
+  }
+  /* connector line */
+  .pipe-phase:not(:last-child) .pipe-spine::after {
+    content: '';
+    position: absolute; left: 39px; top: 72px; bottom: -28px;
+    width: 2px; background: linear-gradient(to bottom, var(--gold), var(--rule));
+    z-index: 0;
+  }
+  .pipe-spine {
+    display: flex; flex-direction: column; align-items: center;
+    padding-top: 20px; position: relative; z-index: 1;
+  }
+  .pipe-num {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--ink); color: var(--gold);
+    font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 4px var(--paper), 0 0 0 6px var(--ink);
+    flex-shrink: 0;
+  }
+  .pipe-content {
+    background: white;
+    border: 1px solid var(--rule);
+    border-top: 3px solid var(--gold);
+    border-radius: 4px;
+    padding: 24px 28px 28px;
+    margin: 12px 0 28px;
+    box-shadow: 4px 4px 0 var(--sand);
+  }
+  .pipe-content.phase-2 { border-top-color: var(--teal); }
+  .pipe-content.phase-2 .pipe-phase-tag { color: var(--teal); border-color: var(--teal); }
+  .pipe-content.phase-3 { border-top-color: var(--rust); }
+  .pipe-content.phase-3 .pipe-phase-tag { color: var(--rust); border-color: var(--rust); }
+  .pipe-content.phase-4 { border-top-color: #7c5cbf; }
+  .pipe-content.phase-4 .pipe-phase-tag { color: #7c5cbf; border-color: #7c5cbf; }
+
+  .pipe-header {
+    display: flex; align-items: baseline; gap: 14px; margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .pipe-phase-tag {
+    font-family: 'DM Mono', monospace; font-size: 9px;
+    letter-spacing: .16em; text-transform: uppercase;
+    border: 1px solid var(--gold); color: var(--gold);
+    padding: 3px 8px; border-radius: 2px;
+  }
+  .pipe-title {
+    font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700;
+  }
+
+  /* steps inside phase */
+  .steps { display: flex; flex-direction: column; gap: 14px; }
+  .step {
+    display: grid; grid-template-columns: 28px 1fr;
+    gap: 0 14px; align-items: start;
+  }
+  .step-icon {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--paper); border: 1px solid var(--rule);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; flex-shrink: 0; margin-top: 1px;
+  }
+  .step-body h4 {
+    font-size: 13px; font-weight: 500; margin-bottom: 4px;
+  }
+  .step-body p {
+    font-size: 12.5px; line-height: 1.65; color: var(--muted);
+  }
+  .step-body p strong { color: var(--text); font-weight: 500; }
+
+  /* code pill */
+  code {
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    background: var(--sand); padding: 1px 6px; border-radius: 3px;
+    color: var(--ink);
+  }
+
+  /* callout */
+  .callout {
+    margin-top: 18px; padding: 14px 18px;
+    background: var(--teal-light); border-left: 3px solid var(--teal);
+    border-radius: 0 4px 4px 0; font-size: 12.5px; line-height: 1.65;
+    color: #1a4040;
+  }
+  .callout strong { color: var(--teal); }
+  .callout-warn {
+    background: #fff7ec; border-left-color: var(--gold); color: #5a3d00;
+  }
+  .callout-warn strong { color: #9a6500; }
+
+  /* tool table */
+  .tool-table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 12px; }
+  .tool-table th {
+    font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--muted);
+    text-align: left; padding: 6px 10px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .tool-table td { padding: 8px 10px; border-bottom: 1px solid #ede8dc; vertical-align: top; }
+  .tool-table tr:last-child td { border-bottom: none; }
+  .tool-table td:first-child { font-weight: 500; white-space: nowrap; }
+  .effort { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; }
+  .e-low  { background: #e0f5e0; color: #1a6b1a; }
+  .e-med  { background: #fff3dc; color: #7a5000; }
+  .e-high { background: #fde8e0; color: #8b2200; }
+
+  /* prompt block */
+  .prompt-block {
+    margin-top: 14px; background: #0e0e0e; color: #e8d9b0;
+    border-radius: 4px; padding: 18px 20px;
+    font-family: 'DM Mono', monospace; font-size: 11.5px; line-height: 1.8;
+    border: 1px solid #2a2a2a; position: relative;
+  }
+  .prompt-block::before {
+    content: 'PROMPT TEMPLATE';
+    position: absolute; top: -1px; right: 14px;
+    font-size: 9px; letter-spacing: .15em;
+    background: var(--gold); color: var(--ink);
+    padding: 2px 8px; border-radius: 0 0 3px 3px;
+  }
+  .prompt-block .ph { color: var(--gold); }
+  .prompt-block .kw { color: #7dd3d3; }
+
+  /* architecture diagram */
+  .arch {
+    background: var(--ink); border-radius: 6px;
+    padding: 28px 32px; margin-top: 18px;
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    line-height: 2; color: #c8c0b0;
+    overflow-x: auto;
+  }
+  .arch .node  { color: #f0d98a; font-weight: 500; }
+  .arch .arrow { color: #4aadad; }
+  .arch .label { color: #a09080; font-size: 10px; }
+  .arch .warn  { color: #d97452; }
+
+  /* risk table */
+  .risk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+  .risk-card {
+    background: white; border: 1px solid var(--rule); border-radius: 4px;
+    padding: 14px 16px; font-size: 12px;
+  }
+  .risk-card h5 { font-size: 12px; font-weight: 500; margin-bottom: 6px; display: flex; gap: 7px; align-items: center; }
+  .risk-card p { color: var(--muted); line-height: 1.6; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-red    { background: #d94040; }
+  .dot-amber  { background: #d98800; }
+  .dot-green  { background: #2a9d60; }
+
+  /* footer */
+  footer {
+    margin-top: 64px; padding: 24px 60px;
+    border-top: 1px solid var(--rule);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    color: var(--muted); letter-spacing: .1em; text-transform: uppercase;
+  }
+
+  @media (max-width: 640px) {
+    header { padding: 36px 24px 30px; }
+    .main { padding: 0 18px; }
+    .pipe-phase { grid-template-columns: 54px 1fr; gap: 0 14px; }
+    .pipe-content { padding: 18px 16px 20px; }
+    .risk-grid { grid-template-columns: 1fr; }
+    footer { flex-direction: column; gap: 8px; padding: 20px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-eyebrow">System Architecture · Arabic Book Brief Engine</div>
+  <h1>Automated Arabic Book<br><em>Brief Pipeline</em></h1>
+  <p class="header-sub">
+    A production-grade, end-to-end system for transforming Arabic books into polished 3–5 minute audio/video summaries — from raw PDF to broadcast-ready output.
+  </p>
+  <div class="header-badges">
+    <span class="badge badge-gold">4 Phases</span>
+    <span class="badge badge-teal">Multi-Agent LLM</span>
+    <span class="badge badge-rust">Arabic-First Design</span>
+  </div>
+</header>
+
+<div class="main">
+
+  <div class="section-label">Pipeline Architecture</div>
+
+  <div class="pipeline">
+
+    <!-- PHASE 1 -->
+    <div class="pipe-phase">
+      <div class="pipe-spine">
+        <div class="pipe-num">1</div>
+      </div>
+      <div class="pipe-content phase-1">
+        <div class="pipe-header">
+          <span class="pipe-phase-tag">Phase 1</span>
+          <span class="pipe-title">Extraction & Pre-processing</span>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-icon">📄</div>
+            <div class="step-body">
+              <h4>1a — PDF Ingestion & Type Detection</h4>
+              <p>Detect whether the PDF is <strong>digitally born</strong> or <strong>scanned</strong> before choosing the extraction path. Use <code>pdfminer.six</code> or <code>PyMuPDF</code> for digital PDFs. For scanned books use <code>EasyOCR</code> (Arabic model) or <code>Tesseract 5</code> with <code>ara</code> tessdata — both outperform Cloud Vision for Arabic at scale and cost.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-icon">🔪</div>
+            <div class="step-body">
+              <h4>1b — Semantic Chunking</h4>
+              <p><strong>Do not send the full book to the LLM.</strong> Use chapter/section boundaries from the PDF outline first, then fall back to paragraph-level chunking with a 1500-token max and a 200-token overlap. Libraries: <code>langchain.text_splitter.RecursiveCharacterTextSplitter</code> with Arabic-aware sentence separators (<code>['.\n', '،\n', '\n\n']</code>).</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-icon">🔤</div>
+            <div class="step-body">
+              <h4>1c — Diacritization (Harakat)</h4>
+              <p>Run text through <strong>Farasa Diacritizer</strong> (QCRI — most accurate for MSA) before any downstream use. This is a pipeline-level requirement, not optional, as it directly governs TTS pronunciation quality. Alternative: <code>mishkal</code> (open-source, slower). Store both raw and diacritized versions.</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-warn">
+          <strong>⚠ Arabic-Specific Pitfall:</strong> PyMuPDF often extracts Arabic text in visual (right-to-left reversed) order. Apply python-bidi + arabic-reshaper immediately after extraction before any further processing.
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 2 -->
+    <div class="pipe-phase">
+      <div class="pipe-spine">
+        <div class="pipe-num">2</div>
+      </div>
+      <div class="pipe-content phase-2">
+        <div class="pipe-header">
+          <span class="pipe-phase-tag">Phase 2</span>
+          <span class="pipe-title">Multi-Agent Script Generation</span>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-icon">🗺️</div>
+            <div class="step-body">
+              <h4>2a — Analyst Agent (Map-Reduce)</h4>
+              <p>Before writing, extract structured meaning from all chunks: themes, key arguments, memorable quotes, author's tone. Use a <strong>map-reduce</strong> pattern — summarize each chunk independently, then reduce to a unified "book DNA" JSON object passed to the next agent.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-icon">✍️</div>
+            <div class="step-body">
+              <h4>2b — Scriptwriter Agent</h4>
+              <p>Input is the "book DNA" JSON, not raw text. Output: a 600–750 word Arabic script (Arabic TTS pace ≈ 120–140 wpm → 4.5–6 min at 750 words; target 680 words for 5 min).</p>
+              <div class="prompt-block">
+<span class="kw">أنت كاتب سيناريو محترف.</span> بناءً على تحليل الكتاب التالي:
+<span class="ph">{book_dna_json}</span>
+
+اكتب سكريبت فيديو <span class="kw">680 كلمة</span> باللغة العربية الفصحى يشمل:
+— <span class="ph">هوك قوي</span> في الجملة الأولى (سؤال أو إحصاء صادم)
+— <span class="ph">3 رؤى محورية</span> مع انتقالات واضحة
+— <span class="ph">خاتمة عاطفية</span> تدفع المشاهد للتفكير
+— أسلوب <span class="kw">{genre_tone}</span>
+أخرج السكريبت فقط بدون أي شرح.
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-icon">✅</div>
+            <div class="step-body">
+              <h4>2c — Editor Agent (Scored Review)</h4>
+              <p>A second LLM call evaluates the script against a rubric and returns a structured JSON score: <code>{"hook": 0-10, "flow": 0-10, "word_count": int, "grammar_issues": [...], "approved": bool}</code>. If <code>approved: false</code>, the script loops back to 2b with the feedback injected. Max 2 retries before human escalation flag.</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout">
+          <strong>Orchestration:</strong> Use <strong>LangGraph</strong> for this multi-agent graph — it provides native support for conditional edges (the retry loop), state persistence, and streaming visibility into which agent is running.
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 3 -->
+    <div class="pipe-phase">
+      <div class="pipe-spine">
+        <div class="pipe-num">3</div>
+      </div>
+      <div class="pipe-content phase-3">
+        <div class="pipe-header">
+          <span class="pipe-phase-tag">Phase 3</span>
+          <span class="pipe-title">Audio Synthesis (TTS)</span>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-icon">🎙️</div>
+            <div class="step-body">
+              <h4>Voice Selection Strategy</h4>
+              <p>Use the <strong>diacritized script</strong> (from Phase 1c) as input, not the raw script. Route to the best TTS engine based on your quality/cost trade-off:</p>
+              <table class="tool-table">
+                <thead><tr><th>Engine</th><th>Arabic Quality</th><th>Diacritics</th><th>Cost/min</th><th>Fit</th></tr></thead>
+                <tbody>
+                  <tr><td>ElevenLabs</td><td>★★★★★ Most natural</td><td>Understands naturally</td><td>~$0.30</td><td><span class="effort e-high">Premium</span></td></tr>
+                  <tr><td>Google Neural2</td><td>★★★★☆ Very stable</td><td>Excellent with harakat</td><td>~$0.04</td><td><span class="effort e-med">Scale</span></td></tr>
+                  <tr><td>Azure Cognitive</td><td>★★★★☆</td><td>Good</td><td>~$0.04</td><td><span class="effort e-med">Scale</span></td></tr>
+                  <tr><td>Coqui TTS (local)</td><td>★★★☆☆ Improving</td><td>Manual control</td><td>$0</td><td><span class="effort e-low">Dev/Test</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-icon">🎛️</div>
+            <div class="step-body">
+              <h4>Post-Processing</h4>
+              <p>After TTS, apply lightweight audio normalization using <code>pydub</code>: normalize loudness to <strong>–16 LUFS</strong> (podcast standard), add 500ms silence at section breaks, export as 128kbps MP3 for video, 256kbps AAC for audio-only distribution.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 4 -->
+    <div class="pipe-phase">
+      <div class="pipe-spine">
+        <div class="pipe-num">4</div>
+      </div>
+      <div class="pipe-content phase-4">
+        <div class="pipe-header">
+          <span class="pipe-phase-tag">Phase 4</span>
+          <span class="pipe-title">Video Assembly</span>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-icon">🎬</div>
+            <div class="step-body">
+              <h4>Three Production Tracks</h4>
+              <table class="tool-table">
+                <thead><tr><th>Track</th><th>Tools</th><th>Automation</th><th>Effort</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td>AI Avatar</td>
+                    <td>HeyGen / D-ID API</td>
+                    <td>Full — send script + voice, receive MP4</td>
+                    <td><span class="effort e-low">Low</span></td>
+                  </tr>
+                  <tr>
+                    <td>Kinetic Text</td>
+                    <td>MoviePy + Pillow + arabic-reshaper</td>
+                    <td>Full — Python renders RTL text overlays, transitions, book cover visual</td>
+                    <td><span class="effort e-med">Medium</span></td>
+                  </tr>
+                  <tr>
+                    <td>B-Roll + Voice</td>
+                    <td>Pexels API + MoviePy</td>
+                    <td>Semi — keyword extraction → stock footage search → auto-cut to audio beats</td>
+                    <td><span class="effort e-high">High</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-icon">💡</div>
+            <div class="step-body">
+              <h4>Recommended Path for Launch</h4>
+              <p><strong>Start with Track 2 (Kinetic Text)</strong>. It is fully self-hosted, costs nothing beyond compute, produces a distinctive aesthetic, and handles RTL Arabic natively with <code>arabic-reshaper</code> + <code>Pillow</code>. This is also a strong differentiator — most Arabic book content channels look the same with avatar videos.</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout">
+          <strong>Arabic RTL in MoviePy:</strong> Pillow does not handle Arabic shaping natively. You must reshape + bidi-reorder every text string before passing it to <code>ImageClip</code>. Use: <code>arabic_reshaper.reshape()</code> → <code>get_display()</code> → then render.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end pipeline -->
+
+  <!-- ORCHESTRATION -->
+  <div class="section-label">Orchestration Architecture</div>
+  <div class="arch">
+<span class="label">          INPUT</span>
+<span class="node">           Arabic PDF</span>
+               │
+               ▼
+<span class="node">    ┌─────────────────────┐</span>
+<span class="node">    │   Type Detector     │</span>  <span class="label">← digital vs scanned</span>
+<span class="node">    └──────┬──────────────┘</span>
+           │
+    ┌──────▼──────┐
+    │             │
+<span class="node"> PyMuPDF    EasyOCR</span>  <span class="label">← parallel, merge output</span>
+    │             │
+    └──────┬──────┘
+           │
+<span class="arrow">           ▼  arabic-reshaper + python-bidi</span>
+<span class="node">    ┌─────────────────────┐</span>
+<span class="node">    │   Farasa Diacritizer│</span>
+<span class="node">    └──────┬──────────────┘</span>
+           │
+<span class="arrow">           ▼  semantic chunking</span>
+<span class="node">    ┌─────────────────────────────────┐</span>
+<span class="node">    │   LangGraph Multi-Agent Graph   │</span>
+<span class="node">    │  ┌──────────┐  ┌─────────────┐ │</span>
+<span class="node">    │  │ Analyst  │→ │ Scriptwriter│ │</span>
+<span class="node">    │  └──────────┘  └──────┬──────┘ │</span>
+<span class="node">    │                ┌──────▼──────┐ │</span>
+<span class="node">    │                │   Editor    │ │</span>
+<span class="node">    │                │ (retry ≤ 2) │ │</span>
+<span class="node">    │                └──────┬──────┘ │</span>
+<span class="node">    └───────────────────────┼────────┘</span>
+                            │
+               ┌────────────┼────────────┐
+               ▼            ▼            ▼
+<span class="node">         ElevenLabs    MoviePy       HeyGen</span>
+<span class="node">           TTS API    Kinetic Text   Avatar</span>
+               │            │            │
+               └────────────┼────────────┘
+                            │
+<span class="arrow">                            ▼</span>
+<span class="node">                    ┌─────────────┐</span>
+<span class="node">                    │  .mp4 brief │</span>  <span class="label">← 4–5 min, Arabic</span>
+<span class="node">                    └─────────────┘</span>
+  </div>
+
+  <!-- RISKS -->
+  <div class="section-label">Risk Register</div>
+  <div class="risk-grid">
+    <div class="risk-card">
+      <h5><span class="dot dot-red"></span> LLM Hallucination in Summary</h5>
+      <p>The editor agent must cross-check named claims against the extracted chunk text. Add a "factual grounding" check: any proper noun in the script must appear in the source chunks.</p>
+    </div>
+    <div class="risk-card">
+      <h5><span class="dot dot-amber"></span> Arabic Dialect vs MSA Mismatch</h5>
+      <p>Classify the book's register first (MSA, Egyptian, Levantine, etc.) using a lightweight classifier. Pass register as a parameter to both the scriptwriter and TTS voice selector.</p>
+    </div>
+    <div class="risk-card">
+      <h5><span class="dot dot-amber"></span> TTS Cost at Scale</h5>
+      <p>Cache audio by script hash. If the same book is re-processed (e.g. after an editor revision), retrieve cached audio rather than regenerating. Use Google Neural2 as cost-efficient fallback for draft passes.</p>
+    </div>
+    <div class="risk-card">
+      <h5><span class="dot dot-green"></span> Copyright / Rights</h5>
+      <p>Ensure the pipeline operates only on books within legal rights window (public domain, licensed, or owned content). Add an input-validation step that flags PDFs without clear provenance metadata.</p>
+    </div>
+  </div>
+
+  <!-- TECH STACK -->
+  <div class="section-label">Recommended Tech Stack</div>
+  <div style="background:white;border:1px solid var(--rule);border-radius:4px;padding:22px 28px;box-shadow:4px 4px 0 var(--sand);">
+    <table class="tool-table">
+      <thead><tr><th>Layer</th><th>Primary</th><th>Alternative</th></tr></thead>
+      <tbody>
+        <tr><td>PDF Extraction</td><td><code>PyMuPDF</code> + <code>pdfminer.six</code></td><td><code>pypdf2</code></td></tr>
+        <tr><td>OCR (scanned)</td><td><code>EasyOCR</code> Arabic</td><td>Tesseract 5 + ara</td></tr>
+        <tr><td>Arabic Text Prep</td><td><code>arabic-reshaper</code> + <code>python-bidi</code></td><td>—</td></tr>
+        <tr><td>Diacritization</td><td>Farasa API (QCRI)</td><td><code>mishkal</code> (offline)</td></tr>
+        <tr><td>Chunking</td><td>LangChain <code>RecursiveCharacterTextSplitter</code></td><td>custom sentence splitter</td></tr>
+        <tr><td>LLM</td><td>Claude 3.5 Sonnet (Arabic quality)</td><td>GPT-4o</td></tr>
+        <tr><td>Orchestration</td><td><code>LangGraph</code></td><td>CrewAI</td></tr>
+        <tr><td>TTS — Premium</td><td>ElevenLabs API</td><td>Azure Cognitive Services</td></tr>
+        <tr><td>TTS — Scale</td><td>Google Cloud TTS Neural2</td><td>—</td></tr>
+        <tr><td>Audio Post</td><td><code>pydub</code> + <code>ffmpeg</code></td><td>—</td></tr>
+        <tr><td>Video — Kinetic</td><td><code>MoviePy</code> + <code>Pillow</code></td><td>—</td></tr>
+        <tr><td>Video — Avatar</td><td>HeyGen API</td><td>D-ID API</td></tr>
+        <tr><td>Pipeline UI</td><td><code>Streamlit</code></td><td>FastAPI + React</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<footer>
+  <span>Arabic Book Brief Engine · Architecture v2.0</span>
+  <span>4 Phases · Multi-Agent · Arabic-First</span>
+</footer>
+
+</body>
+</html>
