@@ -92,6 +92,106 @@ class OCREngine:
         return pages
 
     # ------------------------------------------------------------------ #
+    #  tessdata_best upgrade                                               #
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def _upgrade_ara_tessdata() -> None:
+        """
+        Replace the standard apt-installed ara.traineddata with the
+        tessdata_best model from the Tesseract project.  The 'best' model
+        is trained on more data and captures edge-of-page lines that the
+        standard model misses.
+
+        Runs silently once per environment; logs a message either way.
+        Fails gracefully — the standard model is kept if the download fails.
+        """
+        import os
+        import subprocess
+        import urllib.request
+        from pathlib import Path
+
+        _URL = (
+            "https://github.com/tesseract-ocr/tessdata_best"
+            "/raw/main/ara.traineddata"
+        )
+        _MARKER = "tessdata_best"   # written into first line of downloaded file
+
+        # Locate tessdata directory from tesseract binary
+        try:
+            out = subprocess.run(
+                ["tesseract", "--print-parameters"],
+                capture_output=True, text=True, timeout=10,
+            )
+            # tesseract --list-langs also reveals the tessdata path
+            out2 = subprocess.run(
+                ["tesseract", "--list-langs"],
+                capture_output=True, text=True, timeout=10,
+            )
+            # Extract path from stderr: "TESSDATA_PREFIX = /usr/share/..."
+            tessdata_dir: str | None = None
+            for line in (out.stderr + out2.stderr).splitlines():
+                if "TESSDATA_PREFIX" in line or "tessdata" in line.lower():
+                    parts = line.split("=", 1)
+                    if len(parts) == 2:
+                        candidate = parts[1].strip().rstrip("/")
+                        if Path(candidate).is_dir():
+                            tessdata_dir = candidate
+                            break
+                    elif "tessdata" in line:
+                        for tok in line.split():
+                            if "tessdata" in tok and Path(tok.rstrip(":")).is_dir():
+                                tessdata_dir = tok.rstrip(":")
+                                break
+        except Exception:
+            tessdata_dir = None
+
+        # Fallback search
+        if not tessdata_dir:
+            for candidate in [
+                os.environ.get("TESSDATA_PREFIX", ""),
+                "/usr/share/tesseract-ocr/5/tessdata",
+                "/usr/share/tesseract-ocr/4.00/tessdata",
+                "/usr/local/share/tessdata",
+            ]:
+                if candidate and Path(candidate).is_dir():
+                    tessdata_dir = candidate
+                    break
+
+        if not tessdata_dir:
+            logger.debug("tessdata dir not found — skipping tessdata_best upgrade.")
+            return
+
+        target = Path(tessdata_dir) / "ara.traineddata"
+
+        # Check if already upgraded (first 64 bytes contain our marker URL)
+        if target.exists():
+            try:
+                with open(target, "rb") as fh:
+                    header = fh.read(200).decode("latin-1", errors="ignore")
+                if _MARKER in header:
+                    logger.debug("tessdata_best Arabic model already installed.")
+                    return
+            except Exception:
+                pass  # unreadable header — proceed with download
+
+        # Download
+        logger.info("Downloading tessdata_best Arabic model → %s …", target)
+        try:
+            tmp = target.with_suffix(".tmp")
+            urllib.request.urlretrieve(_URL, tmp)
+            tmp.replace(target)
+            logger.info("tessdata_best Arabic model installed successfully.")
+        except Exception as exc:
+            logger.warning(
+                "tessdata_best download failed (%s) — using standard model.", exc
+            )
+            try:
+                tmp.unlink(missing_ok=True)
+            except Exception:
+                pass
+
+    # ------------------------------------------------------------------ #
     #  Lazy initialisation                                                 #
     # ------------------------------------------------------------------ #
 
@@ -134,6 +234,7 @@ class OCREngine:
             try:
                 import pytesseract  # noqa: PLC0415 (just verify it's available)
                 self._reader = pytesseract
+                self._upgrade_ara_tessdata()
                 logger.info("Tesseract reader initialised.")
             except ImportError as exc:
                 raise ImportError(
@@ -191,23 +292,41 @@ class OCREngine:
         import numpy as np  # noqa: PLC0415
         from PIL import Image  # noqa: PLC0415
 
-        # Pass a numpy array (not a PIL Image) so pytesseract writes a TIFF
-        # temp file without embedded DPI metadata.  PIL Images loaded from the
-        # PNG store carry the pdf2image render DPI (300 dpi) in the pHYs chunk;
-        # Tesseract would then apply stricter minimum line-height thresholds and
-        # silently drop isolated lines near page edges (attribution headers, last
-        # body lines).  Without DPI metadata, Tesseract uses its 70-dpi default
-        # which has permissive thresholds — matching the reference notebook
-        # (pdf_ocr_c.ipynb) which uses np.array(page) with no config string.
         img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
         arr = np.array(img)
         try:
-            # Do NOT pass any --psm or --dpi flags: the reference notebook uses
-            # pytesseract.image_to_string(arr, lang='ara') with no config string
-            # and successfully captures lines at the top and bottom page edges.
-            # Explicit --psm 3 can activate stricter segmentation in some
-            # Tesseract builds and causes the same edge-line loss as --dpi 300.
-            return self._reader.image_to_string(arr, lang="ara", config="")
+            # Full-page pass: no explicit config so Tesseract uses its compiled
+            # defaults (PSM 3, OEM 3).  Passing explicit flags changes internal
+            # scoring thresholds in some Tesseract builds and drops edge lines.
+            body = self._reader.image_to_string(arr, lang="ara", config="")
+
+            # ── Header rescue pass ────────────────────────────────────────
+            # PSM 3 (auto-layout) often misses short isolated lines at the very
+            # top of a scanned page (attribution headers, running titles).
+            # PSM 11 (sparse text, no particular order) has no minimum-region
+            # threshold and catches these lines reliably.
+            # We crop the top 12 % of the image and run a second pass; any new
+            # text found there is prepended to the body text.
+            h = arr.shape[0]
+            top_crop = arr[: max(1, int(h * 0.12)), :]
+            header = self._reader.image_to_string(
+                top_crop, lang="ara", config="--psm 11"
+            )
+            header = header.strip()
+            if header and header not in body:
+                body = header + "\n" + body
+
+            # ── Footer rescue pass ────────────────────────────────────────
+            # Same problem applies to the last few lines of a page.
+            bottom_crop = arr[int(h * 0.88):, :]
+            footer = self._reader.image_to_string(
+                bottom_crop, lang="ara", config="--psm 11"
+            )
+            footer = footer.strip()
+            if footer and footer not in body:
+                body = body + "\n" + footer
+
+            return body
         except Exception as exc:
             logger.warning("Tesseract OCR failed on page: %s", exc)
             return ""
