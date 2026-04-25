@@ -189,7 +189,7 @@ class OCREngine:
 
     def _tesseract_page(self, image_bytes: bytes) -> str:
         import numpy as np  # noqa: PLC0415
-        from PIL import Image  # noqa: PLC0415
+        from PIL import Image, ImageOps  # noqa: PLC0415
 
         # Pass a numpy array (not a PIL Image) so that pytesseract writes the
         # temp file without embedded DPI metadata.  PIL Images carry the
@@ -200,6 +200,11 @@ class OCREngine:
         # default and correctly segments the full page — matching the
         # behaviour of the reference notebook (optimized_approach.txt).
         img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        # Add white border so text printed flush against the physical page edge
+        # is not clipped by Tesseract's layout-analysis margin heuristics.
+        # 60 px at the rendered DPI (300) is ~5 mm — sufficient for any standard
+        # margin while adding negligible processing overhead.
+        img = ImageOps.expand(img, border=60, fill="white")
         arr = np.array(img)
         try:
             # Do NOT pass --dpi here: the numpy array carries no DPI metadata, so

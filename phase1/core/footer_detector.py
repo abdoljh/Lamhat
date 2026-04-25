@@ -137,11 +137,12 @@ class FooterDetector:
         s = cleaned.strip()
         if not s:
             return False, 0.0
-        # Standard: (١), [٢], {٣}  or Western equivalents
-        if re.match(r'^[\(\[\{]\s*[٠-٩۰-۹0-9]\s*[\)\]\}]', s):
+        # Standard: (١), [٢], {٣}, (؟)  or Western equivalents
+        # ؟ (U+061F Arabic question mark) appears in some footnotes as a "sic" marker.
+        if re.match(r'^[\(\[\{]\s*[٠-٩۰-۹0-9؟\?]\s*[\)\]\}]', s):
             return True, 0.95
-        # RTL-reversed: )١(
-        if re.match(r'^[\)\]\}]\s*[٠-٩۰-۹0-9]\s*[\(\[\{]', s):
+        # RTL-reversed: )١( or )؟(
+        if re.match(r'^[\)\]\}]\s*[٠-٩۰-۹0-9؟\?]\s*[\(\[\{]', s):
             return True, 0.90
         # Asterisk, dagger, or similar typographic markers
         if re.match(r'^[*†‡§¶#\+\-—]', s):
@@ -188,7 +189,8 @@ class FooterDetector:
             r'|فصل'
             r'|كتاب'
             r'|ذكريات'
-            r'|مذكرات',
+            r'|مذكرات'
+            r'|مدكرات',   # common Tesseract misspelling of مذكرات
             s,
         ))
         has_number = bool(re.search(r'[٠-٩۰-۹0-9]', s))
@@ -301,6 +303,27 @@ class FooterDetector:
                         confidence=num_conf, page_num=page_num,
                         line_index=idx, original_line=line,
                     ))
+
+        # ── Full-page scan for mid-page footnote markers ────────────────
+        # Footnotes inserted mid-page by Tesseract layout analysis (outside the
+        # bottom 15% region) are caught here.  Only the strict parenthesised-
+        # digit / question-mark patterns are used — avoiding false positives on
+        # body text that happens to contain a digit.
+        already_flagged = {f.line_index for f in footers}
+        for idx, line in enumerate(lines):
+            if idx in already_flagged or not line.strip():
+                continue
+            cleaned = self._clean_bidi_marks(line)
+            s = cleaned.strip()
+            if (re.match(r'^[\(\[\{]\s*[٠-٩۰-۹0-9؟\?]\s*[\)\]\}]', s) or
+                    re.match(r'^[\)\]\}]\s*[٠-٩۰-۹0-9؟\?]\s*[\(\[\{]', s)):
+                fn = DetectedFooter(
+                    text=line.strip(), footer_type=FooterType.FOOTNOTE,
+                    confidence=0.88, page_num=page_num,
+                    line_index=idx, original_line=line,
+                )
+                footers.append(fn)
+                already_flagged.add(idx)
 
         footers = self._link_footnote_continuations(lines, footers, page_num)
         self.detected_footers.extend(footers)
