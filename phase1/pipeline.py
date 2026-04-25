@@ -39,11 +39,14 @@ class Phase1Config:
     # LLM OCR correction (scanned pages only)
     # Sends raw Tesseract output through Claude Haiku to fix OCR errors and
     # join line-wrapped text.  Requires anthropic_api_key.  ~$0.001/page.
-    ocr_correction: bool   = True
+    # LLM OCR correction and page stitching are OFF by default to keep Phase 1
+    # focused on raw text extraction without spending API tokens.  Enable them
+    # explicitly when higher-quality flowing text is needed.
+    ocr_correction: bool   = False
     # Cross-page boundary stitching (scanned pages only)
     # Strips running headers/footers and joins sentences split across page
     # breaks.  Runs after OCR correction.  ~$0.0001/boundary.
-    page_stitching: bool   = True
+    page_stitching: bool   = False
     # LLM summarization
     anthropic_api_key: str = ""
     script_genre:   str    = "non-fiction"   # hint for Scriptwriter tone

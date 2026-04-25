@@ -123,9 +123,6 @@ class FooterDetector:
         # Arabic word for "page" + number
         if re.search(r'صفحة?\s*[٠-٩۰-۹0-9]+', s):
             return True, 0.90
-        # Embedded number in a short line
-        if self._extract_inline_numbers(s) and len(s) < 80:
-            return True, 0.75
         return False, 0.0
 
     def _is_footnote(self, text: str) -> Tuple[bool, float]:
@@ -187,18 +184,20 @@ class FooterDetector:
         if any(c in s for c in '.،:؛'):
             return False, 0.0
         has_title = bool(re.search(
-            r'مقدمة'   # مقدمة
-            r'|فصل'               # فصل
-            r'|كتاب'         # كتاب
-            r'|ذكريات'  # ذكريات
-            r'|مذكرات', # مذكرات
+            r'مقدمة'
+            r'|فصل'
+            r'|كتاب'
+            r'|ذكريات'
+            r'|مذكرات',
             s,
         ))
         has_number = bool(re.search(r'[٠-٩۰-۹0-9]', s))
+        # Only strip a top-of-page line when it clearly looks like a header:
+        # has an embedded page number OR a known book/chapter keyword.
+        # Short-but-pure-text lines (attributions, section titles) must NOT be
+        # stripped here — use the cross-page frequency detector for those.
         if has_title or has_number:
             return True, 0.80
-        if len(s) < 30:
-            return True, 0.50
         return False, 0.0
 
     # ------------------------------------------------------------------ #
@@ -255,8 +254,11 @@ class FooterDetector:
         """
         lines       = page_text.split('\n')
         total       = len(lines)
-        footer_start = int(total * (1 - self.page_height_ratio))
-        header_end   = int(total * self.page_height_ratio)
+        if total == 0:
+            return []
+        # Ensure at least 1 line is examined at each end even on short pages.
+        header_end   = max(1, int(total * self.page_height_ratio))
+        footer_start = min(total - 1, int(total * (1 - self.page_height_ratio)))
         footers: List[DetectedFooter] = []
 
         # ── Bottom region: footnotes → page numbers → separators ────────
