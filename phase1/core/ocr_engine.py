@@ -189,30 +189,25 @@ class OCREngine:
 
     def _tesseract_page(self, image_bytes: bytes) -> str:
         import numpy as np  # noqa: PLC0415
-        from PIL import Image, ImageOps  # noqa: PLC0415
+        from PIL import Image  # noqa: PLC0415
 
-        # Pass a numpy array (not a PIL Image) so that pytesseract writes the
-        # temp file without embedded DPI metadata.  PIL Images carry the
-        # pdf2image render DPI (300 dpi) into the PNG pHYs chunk; Tesseract
-        # then applies stricter layout-analysis thresholds and drops isolated
-        # lines at page edges (attribution headers, last body lines).  A
-        # numpy array has no DPI metadata, so Tesseract uses its 70-dpi
-        # default and correctly segments the full page — matching the
-        # behaviour of the reference notebook (optimized_approach.txt).
+        # Pass a numpy array (not a PIL Image) so pytesseract writes a TIFF
+        # temp file without embedded DPI metadata.  PIL Images loaded from the
+        # PNG store carry the pdf2image render DPI (300 dpi) in the pHYs chunk;
+        # Tesseract would then apply stricter minimum line-height thresholds and
+        # silently drop isolated lines near page edges (attribution headers, last
+        # body lines).  Without DPI metadata, Tesseract uses its 70-dpi default
+        # which has permissive thresholds — matching the reference notebook
+        # (pdf_ocr_c.ipynb) which uses np.array(page) with no config string.
         img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-        # Add white border so text printed flush against the physical page edge
-        # is not clipped by Tesseract's layout-analysis margin heuristics.
-        # 60 px at the rendered DPI (300) is ~5 mm — sufficient for any standard
-        # margin while adding negligible processing overhead.
-        img = ImageOps.expand(img, border=60, fill="white")
         arr = np.array(img)
         try:
-            # Do NOT pass --dpi here: the numpy array carries no DPI metadata, so
-            # Tesseract uses its 70-dpi default which applies permissive line-height
-            # thresholds and correctly captures lines near the page margins.
-            # Passing --dpi 300 would restore the strict threshold and silently drop
-            # those edge lines — defeating the purpose of using a numpy array.
-            return self._reader.image_to_string(arr, lang="ara", config="--psm 3")
+            # Do NOT pass any --psm or --dpi flags: the reference notebook uses
+            # pytesseract.image_to_string(arr, lang='ara') with no config string
+            # and successfully captures lines at the top and bottom page edges.
+            # Explicit --psm 3 can activate stricter segmentation in some
+            # Tesseract builds and causes the same edge-line loss as --dpi 300.
+            return self._reader.image_to_string(arr, lang="ara", config="")
         except Exception as exc:
             logger.warning("Tesseract OCR failed on page: %s", exc)
             return ""
