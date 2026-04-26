@@ -295,10 +295,11 @@ class OCREngine:
         img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
         arr = np.array(img)
         try:
-            # Full-page pass: no explicit config so Tesseract uses its compiled
-            # defaults (PSM 3, OEM 3).  Passing explicit flags changes internal
-            # scoring thresholds in some Tesseract builds and drops edge lines.
-            body = self._reader.image_to_string(arr, lang="ara", config="")
+            # Full-page pass: PSM 4 (single column, variable font sizes) fits
+            # Arabic book pages and preserves lines near the page edges better
+            # than PSM 3 (auto-layout) whose region-scoring can drop isolated
+            # short lines at the top/bottom margins.
+            body = self._reader.image_to_string(arr, lang="ara", config="--psm 4")
 
             # ── Header rescue pass ────────────────────────────────────────
             # PSM 3 (auto-layout) often misses short isolated lines at the very
