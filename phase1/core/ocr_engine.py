@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import io
 import logging
+import re
 from enum import Enum, auto
 from typing import TYPE_CHECKING
 
@@ -242,8 +243,36 @@ class OCREngine:
                 ) from exc
 
     # ------------------------------------------------------------------ #
-    #  Backend implementations                                            #
+    #  Backend implementations + OCR text quality helpers                #
     # ------------------------------------------------------------------ #
+
+    _ARA_WORD_RE = re.compile(r'[؀-ۿ]{3,}')
+
+    @classmethod
+    def _is_valid_rescue(cls, text: str) -> bool:
+        """
+        True if rescue OCR text is substantive Arabic content.
+
+        Requires at least 2 Arabic sequences of ≥ 3 chars.  This rejects
+        garbled fragments like ``سي لق ضبن نه`` (only one 3-char Arabic run)
+        while accepting real attribution lines like ``نجدة فتحى صفوة``.
+        """
+        return len(cls._ARA_WORD_RE.findall(text)) >= 2
+
+    @classmethod
+    def _filter_ocr_garbage(cls, text: str) -> str:
+        """
+        Remove lines that contain no Arabic word of ≥ 3 chars.
+
+        PSM 4 sometimes picks up decorative page elements (rules, ornaments,
+        stray punctuation) as single-character or digit-only lines.  Any line
+        lacking at least one Arabic sequence of ≥ 3 chars is discarded.
+        Empty lines (paragraph breaks) are always preserved.
+        """
+        return '\n'.join(
+            line for line in text.split('\n')
+            if not line.strip() or cls._ARA_WORD_RE.search(line)
+        )
 
     def _easyocr_page(self, image_bytes: bytes) -> str:
         import numpy as np  # noqa: PLC0415
@@ -300,31 +329,35 @@ class OCREngine:
             # than PSM 3 (auto-layout) whose region-scoring can drop isolated
             # short lines at the top/bottom margins.
             body = self._reader.image_to_string(arr, lang="ara", config="--psm 4")
+            body = self._filter_ocr_garbage(body)
+
+            h = arr.shape[0]
 
             # ── Header rescue pass ────────────────────────────────────────
-            # PSM 3 (auto-layout) often misses short isolated lines at the very
-            # top of a scanned page (attribution headers, running titles).
-            # PSM 11 (sparse text, no particular order) has no minimum-region
-            # threshold and catches these lines reliably.
-            # We crop the top 12 % of the image and run a second pass; any new
-            # text found there is prepended to the body text.
-            h = arr.shape[0]
-            top_crop = arr[: max(1, int(h * 0.12)), :]
+            # Crop the top 8 % of the image (one text-line height at 300 Dpi)
+            # and run a second pass with PSM 7 (single text line).
+            # PSM 7 is more reliable than PSM 11 for a narrow one-line strip:
+            # it produces a single clean string rather than fragmented tokens.
+            # The result is only accepted when it contains ≥ 2 Arabic words of
+            # ≥ 3 chars — this blocks garbled noise such as "سي لق ضبن نه"
+            # (only one qualifying run) while admitting "نجدة فتحى صفوة".
+            top_crop = arr[: max(1, int(h * 0.08)), :]
             header = self._reader.image_to_string(
-                top_crop, lang="ara", config="--psm 11"
-            )
-            header = header.strip()
-            if header and header not in body:
+                top_crop, lang="ara", config="--psm 7"
+            ).strip()
+            if self._is_valid_rescue(header) and header not in body:
                 body = header + "\n" + body
 
             # ── Footer rescue pass ────────────────────────────────────────
-            # Same problem applies to the last few lines of a page.
+            # PSM 11 (sparse text) on the bottom 12 % catches partial last
+            # lines that PSM 4 sometimes clips at the lower margin.
+            # Garbage-filter and quality-gate applied before appending.
             bottom_crop = arr[int(h * 0.88):, :]
             footer = self._reader.image_to_string(
                 bottom_crop, lang="ara", config="--psm 11"
-            )
-            footer = footer.strip()
-            if footer and footer not in body:
+            ).strip()
+            footer = self._filter_ocr_garbage(footer)
+            if self._is_valid_rescue(footer) and footer not in body:
                 body = body + "\n" + footer
 
             return body
