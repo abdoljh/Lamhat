@@ -249,30 +249,56 @@ class OCREngine:
     _ARA_WORD_RE = re.compile(r'[؀-ۿ]{3,}')
 
     @classmethod
+    def _arabic_ratio(cls, text: str) -> float:
+        """Fraction of non-whitespace chars that fall in the Arabic Unicode block."""
+        non_ws = text.replace(' ', '').replace('\n', '').replace('\t', '')
+        if not non_ws:
+            return 0.0
+        arabic = sum(1 for c in non_ws if '؀' <= c <= 'ۿ')
+        return arabic / len(non_ws)
+
+    @classmethod
     def _is_valid_rescue(cls, text: str) -> bool:
         """
         True if rescue OCR text is substantive Arabic content.
 
-        Requires at least 2 Arabic sequences of ≥ 3 chars.  This rejects
-        garbled fragments like ``سي لق ضبن نه`` (only one 3-char Arabic run)
-        while accepting real attribution lines like ``نجدة فتحى صفوة``.
+        Two conditions must both hold:
+        1. At least 2 Arabic sequences of ≥ 3 chars — rejects single-word
+           fragments like ``سي لق ضبن نه`` (only one qualifying run).
+        2. Arabic chars form > 75 % of non-whitespace content — rejects
+           mixed garbage like ``6ع>©مقال[(ذكذكذك 1 2 0`` (~68 % Arabic)
+           while passing genuine Arabic text (~95–100 % Arabic).
         """
-        return len(cls._ARA_WORD_RE.findall(text)) >= 2
+        stripped = text.strip()
+        if not stripped:
+            return False
+        if len(cls._ARA_WORD_RE.findall(stripped)) < 2:
+            return False
+        return cls._arabic_ratio(stripped) > 0.75
 
     @classmethod
     def _filter_ocr_garbage(cls, text: str) -> str:
         """
-        Remove lines that contain no Arabic word of ≥ 3 chars.
+        Remove lines that are not predominantly Arabic.
 
-        PSM 4 sometimes picks up decorative page elements (rules, ornaments,
-        stray punctuation) as single-character or digit-only lines.  Any line
-        lacking at least one Arabic sequence of ≥ 3 chars is discarded.
+        A line is kept only when it:
+          1. contains at least one Arabic sequence of ≥ 3 chars, AND
+          2. Arabic chars form > 75 % of its non-whitespace content.
+
         Empty lines (paragraph breaks) are always preserved.
+        PSM 4 occasionally produces long symbol+Arabic mixed strings from
+        decorative page elements or faint near-margin printing; those strings
+        have a lower Arabic ratio (~60–70 %) and are discarded here.
         """
-        return '\n'.join(
-            line for line in text.split('\n')
-            if not line.strip() or cls._ARA_WORD_RE.search(line)
-        )
+        clean = []
+        for line in text.split('\n'):
+            s = line.strip()
+            if not s:
+                clean.append(line)
+                continue
+            if cls._ARA_WORD_RE.search(s) and cls._arabic_ratio(s) > 0.75:
+                clean.append(line)
+        return '\n'.join(clean)
 
     def _easyocr_page(self, image_bytes: bytes) -> str:
         import numpy as np  # noqa: PLC0415
