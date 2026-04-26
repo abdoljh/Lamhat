@@ -350,11 +350,14 @@ class OCREngine:
         img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
         arr = np.array(img)
         try:
-            # Full-page pass: PSM 4 (single column, variable font sizes) fits
-            # Arabic book pages and preserves lines near the page edges better
-            # than PSM 3 (auto-layout) whose region-scoring can drop isolated
-            # short lines at the top/bottom margins.
-            body = self._reader.image_to_string(arr, lang="ara", config="--psm 4")
+            # Full-page pass: PSM 3 (automatic layout analysis).
+            # PSM 4 (single-column) was tested but its region-scoring discards
+            # the isolated attribution header at the top of the page
+            # (e.g. نجدة فتحي صفوة) because it does not fit the single-column
+            # model.  PSM 3 finds that line correctly at 400 DPI.
+            # The bottom-line clipping that motivated the PSM 4 experiment is
+            # solved by the 400 DPI default rendering resolution, not by PSM.
+            body = self._reader.image_to_string(arr, lang="ara", config="--psm 3")
             body = self._filter_ocr_garbage(body)
 
             h = arr.shape[0]
