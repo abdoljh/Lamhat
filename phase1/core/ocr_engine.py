@@ -36,6 +36,7 @@ class OCREngine:
 
     Tesseract  — Default. Lightweight; fits Streamlit Cloud's 1 GB RAM limit.
                  Requires: pytesseract + system tesseract-ocr with arabic language pack.
+                 Downloads tessdata_best Arabic model on first run (~14 MB).
 
     EasyOCR    — Good accuracy without extra setup. Handles Arabic RTL natively.
                  Requires: easyocr (~450 MB download on first run).  Local use only.
@@ -49,16 +50,34 @@ class OCREngine:
         pages  = engine.process_pages(ingestion_result.pages)
     """
 
+    # White padding (px) added around the page image before OCR.
+    # Prevents Tesseract's layout analysis from clipping text at the physical
+    # page edges, which it treats as image boundaries.
+    _BORDER_PX: int = 100
+
+    # Top-of-page zone (mm) treated as a separate header strip.
+    # Processed with PSM 6 + confidence filtering instead of PSM 4.
+    _HEADER_MM: float = 20.0
+
+    # Minimum Tesseract word-level confidence (0–100) to keep a word from the
+    # header strip.  Decorative elements / noise score < 65; real text ≥ 65.
+    _HEADER_CONF: int = 65
+
+    # Compiled regex for Arabic word detection (used by _filter_ocr_garbage).
+    _ARA_WORD_RE = re.compile(r'[؀-ۿ]{3,}')
+
     def __init__(
         self,
         backend: OCRBackend = OCRBackend.TESSERACT,
         gpu: bool = False,
-        dpi: int = 300,
+        dpi: int = 400,
     ):
         self.backend = backend
         self.gpu = gpu
         self.dpi = dpi
-        self._reader = None   # lazy-loaded
+        self._reader      = None   # lazy-loaded
+        self._tessdata_dir = ""    # path to ~/.tessdata_custom if download succeeded
+        self._lang         = "ara"
 
     # ------------------------------------------------------------------ #
     #  Public API                                                          #
@@ -93,22 +112,22 @@ class OCREngine:
         return pages
 
     # ------------------------------------------------------------------ #
-    #  tessdata_best upgrade                                               #
+    #  tessdata_best download                                              #
     # ------------------------------------------------------------------ #
 
     @staticmethod
-    def _upgrade_ara_tessdata() -> None:
+    def _download_tessdata_best() -> str:
         """
-        Replace the standard apt-installed ara.traineddata with the
-        tessdata_best model from the Tesseract project.  The 'best' model
-        is trained on more data and captures edge-of-page lines that the
-        standard model misses.
+        Download the tessdata_best Arabic model to ``~/.tessdata_custom/``.
 
-        Runs silently once per environment; logs a message either way.
-        Fails gracefully — the standard model is kept if the download fails.
+        Returns the directory path so callers can pass ``--tessdata-dir``
+        to Tesseract.  Returns ``""`` if the download fails (falls back to
+        the system-installed standard model).
+
+        The user home directory is always writable, unlike the system
+        tessdata prefix which requires root on most Linux installations.
+        Cached after the first successful download.
         """
-        import os
-        import subprocess
         import urllib.request
         from pathlib import Path
 
@@ -116,94 +135,42 @@ class OCREngine:
             "https://github.com/tesseract-ocr/tessdata_best"
             "/raw/main/ara.traineddata"
         )
-        _MARKER = "tessdata_best"   # written into first line of downloaded file
+        cache = Path.home() / ".tessdata_custom"
+        dest  = cache / "ara.traineddata"
 
-        # Locate tessdata directory from tesseract binary
+        if dest.exists():
+            logger.debug("tessdata_best Arabic model already at %s.", dest)
+            return str(cache)
+
         try:
-            out = subprocess.run(
-                ["tesseract", "--print-parameters"],
-                capture_output=True, text=True, timeout=10,
-            )
-            # tesseract --list-langs also reveals the tessdata path
-            out2 = subprocess.run(
-                ["tesseract", "--list-langs"],
-                capture_output=True, text=True, timeout=10,
-            )
-            # Extract path from stderr: "TESSDATA_PREFIX = /usr/share/..."
-            tessdata_dir: str | None = None
-            for line in (out.stderr + out2.stderr).splitlines():
-                if "TESSDATA_PREFIX" in line or "tessdata" in line.lower():
-                    parts = line.split("=", 1)
-                    if len(parts) == 2:
-                        candidate = parts[1].strip().rstrip("/")
-                        if Path(candidate).is_dir():
-                            tessdata_dir = candidate
-                            break
-                    elif "tessdata" in line:
-                        for tok in line.split():
-                            if "tessdata" in tok and Path(tok.rstrip(":")).is_dir():
-                                tessdata_dir = tok.rstrip(":")
-                                break
-        except Exception:
-            tessdata_dir = None
-
-        # Fallback search
-        if not tessdata_dir:
-            for candidate in [
-                os.environ.get("TESSDATA_PREFIX", ""),
-                "/usr/share/tesseract-ocr/5/tessdata",
-                "/usr/share/tesseract-ocr/4.00/tessdata",
-                "/usr/local/share/tessdata",
-            ]:
-                if candidate and Path(candidate).is_dir():
-                    tessdata_dir = candidate
-                    break
-
-        if not tessdata_dir:
-            logger.debug("tessdata dir not found — skipping tessdata_best upgrade.")
-            return
-
-        target = Path(tessdata_dir) / "ara.traineddata"
-
-        # Check if already upgraded (first 64 bytes contain our marker URL)
-        if target.exists():
-            try:
-                with open(target, "rb") as fh:
-                    header = fh.read(200).decode("latin-1", errors="ignore")
-                if _MARKER in header:
-                    logger.debug("tessdata_best Arabic model already installed.")
-                    return
-            except Exception:
-                pass  # unreadable header — proceed with download
-
-        # Download
-        logger.info("Downloading tessdata_best Arabic model → %s …", target)
-        try:
-            tmp = target.with_suffix(".tmp")
+            cache.mkdir(parents=True, exist_ok=True)
+            tmp = dest.with_suffix(".tmp")
+            logger.info("Downloading tessdata_best Arabic model → %s …", dest)
             urllib.request.urlretrieve(_URL, tmp)
-            tmp.replace(target)
-            logger.info("tessdata_best Arabic model installed successfully.")
+            tmp.replace(dest)
+            logger.info("tessdata_best Arabic model installed at %s.", dest)
+            return str(cache)
         except Exception as exc:
             logger.warning(
-                "tessdata_best download failed (%s) — using standard model.", exc
+                "tessdata_best download failed (%s) — using system model.", exc
             )
             try:
-                tmp.unlink(missing_ok=True)
+                dest.with_suffix(".tmp").unlink(missing_ok=True)
             except Exception:
                 pass
+            return ""
 
     # ------------------------------------------------------------------ #
     #  Lazy initialisation                                                 #
     # ------------------------------------------------------------------ #
 
-    def _lazy_init(self):
+    def _lazy_init(self) -> None:
         if self._reader is not None:
             return
 
         if self.backend == OCRBackend.EASYOCR:
             try:
                 import easyocr  # noqa: PLC0415
-                # 'ar' = Arabic; also load 'en' so mixed pages work
                 self._reader = easyocr.Reader(["ar", "en"], gpu=self.gpu)
                 logger.info("EasyOCR reader initialised (gpu=%s).", self.gpu)
             except ImportError as exc:
@@ -214,9 +181,6 @@ class OCREngine:
         elif self.backend == OCRBackend.PADDLEOCR:
             try:
                 from paddleocr import PaddleOCR  # noqa: PLC0415
-                # lang='ar'  → Arabic PP-OCRv3 recognition model
-                # use_angle_cls=True  → auto-correct rotated text blocks
-                # show_log=False  → suppress PaddlePaddle's verbose output
                 self._reader = PaddleOCR(
                     use_angle_cls=True,
                     lang="ar",
@@ -233,62 +197,73 @@ class OCREngine:
 
         else:  # TESSERACT
             try:
-                import pytesseract  # noqa: PLC0415 (just verify it's available)
-                self._reader = pytesseract
-                self._upgrade_ara_tessdata()
-                logger.info("Tesseract reader initialised.")
+                import pytesseract  # noqa: PLC0415
+                self._reader       = pytesseract
+                self._tessdata_dir = self._download_tessdata_best()
+                self._lang         = "ara"
+                logger.info(
+                    "Tesseract reader initialised (tessdata=%s).",
+                    self._tessdata_dir or "system",
+                )
             except ImportError as exc:
                 raise ImportError(
                     "pytesseract not installed. Run: pip install pytesseract"
                 ) from exc
 
     # ------------------------------------------------------------------ #
-    #  Backend implementations + OCR text quality helpers                #
+    #  Tesseract helpers                                                   #
     # ------------------------------------------------------------------ #
 
-    _ARA_WORD_RE = re.compile(r'[؀-ۿ]{3,}')
-
-    @classmethod
-    def _arabic_ratio(cls, text: str) -> float:
-        """Fraction of non-whitespace chars that fall in the Arabic Unicode block."""
-        non_ws = text.replace(' ', '').replace('\n', '').replace('\t', '')
-        if not non_ws:
-            return 0.0
-        arabic = sum(1 for c in non_ws if '؀' <= c <= 'ۿ')
-        return arabic / len(non_ws)
-
-    @classmethod
-    def _is_valid_rescue(cls, text: str) -> bool:
+    def _tess_config(self, psm: int) -> str:
         """
-        True if rescue OCR text is substantive Arabic content.
-
-        Two conditions must both hold:
-        1. At least 2 Arabic sequences of ≥ 3 chars — rejects single-word
-           fragments like ``سي لق ضبن نه`` (only one qualifying run).
-        2. Arabic chars form > 75 % of non-whitespace content — rejects
-           mixed garbage like ``6ع>©مقال[(ذكذكذك 1 2 0`` (~68 % Arabic)
-           while passing genuine Arabic text (~95–100 % Arabic).
+        Build a Tesseract config string: OEM 1 (LSTM only) + given PSM +
+        ``--tessdata-dir`` when tessdata_best was downloaded successfully.
         """
-        stripped = text.strip()
-        if not stripped:
-            return False
-        if len(cls._ARA_WORD_RE.findall(stripped)) < 2:
-            return False
-        return cls._arabic_ratio(stripped) > 0.75
+        parts = ["--oem 1", f"--psm {psm}"]
+        if self._tessdata_dir:
+            parts.append(f"--tessdata-dir {self._tessdata_dir}")
+        return " ".join(parts)
+
+    def _header_ocr(self, strip) -> str:
+        """
+        OCR a narrow header strip using ``image_to_data`` and return only
+        the words whose Tesseract confidence ≥ _HEADER_CONF.
+
+        This separates real header text (high confidence) from decorative
+        noise and faint artefacts (low confidence) even when both appear in
+        the same strip — something a simple ratio or count filter cannot do.
+        Words are grouped by (block, paragraph, line) so RTL line order is
+        preserved.
+        """
+        import pytesseract  # noqa: PLC0415
+        try:
+            data = pytesseract.image_to_data(
+                strip,
+                lang=self._lang,
+                config=self._tess_config(psm=6),
+                output_type=pytesseract.Output.DICT,
+            )
+        except Exception:
+            return ""
+
+        line_words: dict[tuple, list[str]] = {}
+        for word, conf, block, par, line in zip(
+            data["text"],  data["conf"],
+            data["block_num"], data["par_num"], data["line_num"],
+        ):
+            if word.strip() and int(conf) >= self._HEADER_CONF:
+                line_words.setdefault((block, par, line), []).append(word)
+        return "\n".join(" ".join(words) for words in line_words.values())
 
     @classmethod
     def _filter_ocr_garbage(cls, text: str) -> str:
         """
         Remove lines that are not predominantly Arabic.
 
-        A line is kept only when it:
-          1. contains at least one Arabic sequence of ≥ 3 chars, AND
-          2. Arabic chars form > 75 % of its non-whitespace content.
-
-        Empty lines (paragraph breaks) are always preserved.
-        PSM 4 occasionally produces long symbol+Arabic mixed strings from
-        decorative page elements or faint near-margin printing; those strings
-        have a lower Arabic ratio (~60–70 %) and are discarded here.
+        A non-empty line is kept only when it contains at least one Arabic
+        sequence of ≥ 3 chars AND Arabic chars form > 75 % of its
+        non-whitespace content.  Empty lines (paragraph separators) are
+        always preserved.
         """
         clean = []
         for line in text.split('\n'):
@@ -299,6 +274,19 @@ class OCREngine:
             if cls._ARA_WORD_RE.search(s) and cls._arabic_ratio(s) > 0.75:
                 clean.append(line)
         return '\n'.join(clean)
+
+    @classmethod
+    def _arabic_ratio(cls, text: str) -> float:
+        """Fraction of non-whitespace chars in the Arabic Unicode block (U+0600–U+06FF)."""
+        non_ws = text.replace(' ', '').replace('\n', '').replace('\t', '')
+        if not non_ws:
+            return 0.0
+        arabic = sum(1 for c in non_ws if '؀' <= c <= 'ۿ')
+        return arabic / len(non_ws)
+
+    # ------------------------------------------------------------------ #
+    #  Backend implementations                                            #
+    # ------------------------------------------------------------------ #
 
     def _easyocr_page(self, image_bytes: bytes) -> str:
         import numpy as np  # noqa: PLC0415
@@ -319,10 +307,8 @@ class OCREngine:
                  [text, confidence]]
 
         Blocks are returned in approximate top-to-bottom, right-to-left order
-        for Arabic text (PaddleOCR sorts by the top-left y of each box).
-        We extract only the text strings, filter low-confidence hits, and join
-        with newlines so downstream normalisation sees a clean line-per-block
-        structure.
+        for Arabic text.  We extract only the text strings, filter low-confidence
+        hits, and join with newlines.
         """
         import numpy as np  # noqa: PLC0415
         from PIL import Image  # noqa: PLC0415
@@ -336,60 +322,55 @@ class OCREngine:
 
         lines: list[str] = []
         for block in result[0]:
-            # block = [bbox, [text, confidence]]
             text, conf = block[1]
-            if conf >= 0.3 and text.strip():   # discard very low-confidence noise
+            if conf >= 0.3 and text.strip():
                 lines.append(text.strip())
-
         return "\n".join(lines)
 
     def _tesseract_page(self, image_bytes: bytes) -> str:
-        import numpy as np  # noqa: PLC0415
-        from PIL import Image  # noqa: PLC0415
+        """
+        Two-pass Tesseract OCR for a single scanned Arabic page.
 
-        img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-        arr = np.array(img)
+        Pass 1 — Header strip (top 20 mm of content + 100 px border):
+            PSM 6 + ``image_to_data`` with confidence filtering ≥ 65.
+            Isolates real header text (attribution lines, running titles)
+            from decorative noise without brittle ratio heuristics.
+
+        Pass 2 — Body (everything below the header strip):
+            PSM 4 (single column, variable font sizes) + ``image_to_string``.
+            Applied to the cropped sub-image so layout analysis is not
+            confused by the attribution region.
+
+        Preprocessing applied to the full image before either pass:
+            • Grayscale conversion (removes colour noise).
+            • 2× contrast enhancement (makes faint near-margin text readable).
+            • 100 px white border (prevents edge-text clipping).
+
+        Both passes use OEM 1 (LSTM neural network only) and the
+        tessdata_best Arabic model when available (downloaded once to
+        ``~/.tessdata_custom/`` and referenced via ``--tessdata-dir``).
+        """
+        from PIL import Image, ImageEnhance, ImageOps  # noqa: PLC0415
+
+        # Preprocess: grayscale → 2× contrast → white border
+        img = Image.open(io.BytesIO(image_bytes)).convert("L")
+        img = ImageEnhance.Contrast(img).enhance(2.0)
+        padded = ImageOps.expand(img, border=self._BORDER_PX, fill=255)
+
         try:
-            # Full-page pass: PSM 3 (automatic layout analysis).
-            # PSM 4 (single-column) was tested but its region-scoring discards
-            # the isolated attribution header at the top of the page
-            # (e.g. نجدة فتحي صفوة) because it does not fit the single-column
-            # model.  PSM 3 finds that line correctly at 400 DPI.
-            # The bottom-line clipping that motivated the PSM 4 experiment is
-            # solved by the 400 DPI default rendering resolution, not by PSM.
-            body = self._reader.image_to_string(arr, lang="ara", config="--psm 3")
+            # Height (px) of the header strip: border + top 20 mm of content
+            strip_h = self._BORDER_PX + int(self._HEADER_MM / 25.4 * self.dpi)
+            header_strip = padded.crop((0, 0, padded.width, strip_h))
+            header = self._header_ocr(header_strip)
+
+            body_img = padded.crop((0, strip_h, padded.width, padded.height))
+            body = self._reader.image_to_string(
+                body_img, lang=self._lang, config=self._tess_config(psm=4)
+            )
             body = self._filter_ocr_garbage(body)
 
-            h = arr.shape[0]
+            return (header + "\n" + body) if header else body
 
-            # ── Header rescue pass ────────────────────────────────────────
-            # Crop the top 8 % of the image (one text-line height at 300 Dpi)
-            # and run a second pass with PSM 7 (single text line).
-            # PSM 7 is more reliable than PSM 11 for a narrow one-line strip:
-            # it produces a single clean string rather than fragmented tokens.
-            # The result is only accepted when it contains ≥ 2 Arabic words of
-            # ≥ 3 chars — this blocks garbled noise such as "سي لق ضبن نه"
-            # (only one qualifying run) while admitting "نجدة فتحى صفوة".
-            top_crop = arr[: max(1, int(h * 0.08)), :]
-            header = self._reader.image_to_string(
-                top_crop, lang="ara", config="--psm 7"
-            ).strip()
-            if self._is_valid_rescue(header) and header not in body:
-                body = header + "\n" + body
-
-            # ── Footer rescue pass ────────────────────────────────────────
-            # PSM 11 (sparse text) on the bottom 12 % catches partial last
-            # lines that PSM 4 sometimes clips at the lower margin.
-            # Garbage-filter and quality-gate applied before appending.
-            bottom_crop = arr[int(h * 0.88):, :]
-            footer = self._reader.image_to_string(
-                bottom_crop, lang="ara", config="--psm 11"
-            ).strip()
-            footer = self._filter_ocr_garbage(footer)
-            if self._is_valid_rescue(footer) and footer not in body:
-                body = body + "\n" + footer
-
-            return body
         except Exception as exc:
             logger.warning("Tesseract OCR failed on page: %s", exc)
             return ""
