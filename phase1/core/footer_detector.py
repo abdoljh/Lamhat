@@ -18,6 +18,9 @@ For each page:
   • Top 15 % of lines  → check for RUNNING_HEADER
   • Bottom 15 % of lines → check for PAGE_NUMBER, FOOTNOTE, SEPARATOR
   • Multi-line footnote continuations are linked to their marker lines.
+  • Cross-page continuation: a footnote line ending with ``=`` or `` -`` sets a
+    flag so the next page's top lines beginning with ``=`` or ``- `` are stripped
+    as continuation.
 
 Adapted from output/ph1-nb/footer_detector_v3.py (tested on Al-Askari Memoirs,
 pages_5_7.pdf).
@@ -72,6 +75,11 @@ class FooterDetector:
         self.page_height_ratio  = page_height_ratio
         self.min_footer_lines   = min_footer_lines
         self.detected_footers: List[DetectedFooter] = []
+        # Cross-page footnote continuation: set True when the last processed
+        # page ended with a footnote line ending in ``=`` or `` -`` (Arabic
+        # typographic convention for footnotes that overflow to the next page).
+        # Consumed (reset to False) at the start of the next analyze_page call.
+        self._continuation_pending: bool = False
 
     # ------------------------------------------------------------------ #
     #  Bidi cleaning                                                        #
@@ -212,14 +220,23 @@ class FooterDetector:
         footers: List[DetectedFooter],
         page_num: int,
     ) -> List[DetectedFooter]:
-        """Attach continuation lines that follow a footnote marker."""
+        """
+        Attach continuation lines that follow a footnote marker.
+
+        Scans up to 15 lines after each footnote marker (increased from 5 to
+        handle long footnotes).  Stops at a blank line or a new footnote marker.
+        """
         fn_markers = [f for f in footers if f.footer_type == FooterType.FOOTNOTE]
+        already = {f.line_index for f in footers}
         for fn in fn_markers:
             idx = fn.line_index + 1
-            while idx < len(lines) and idx < fn.line_index + 5:
+            while idx < len(lines) and idx < fn.line_index + 15:
                 line = lines[idx].strip()
                 if not line:
                     break
+                if idx in already:
+                    idx += 1
+                    continue
                 cleaned = self._clean_bidi_marks(line)
                 is_new = (
                     re.match(r'^[\(\[\{]\s*[٠-٩۰-۹0-9]\s*[\)\]\}]', cleaned) or
@@ -237,7 +254,7 @@ class FooterDetector:
                         original_line=lines[idx],
                     )
                     footers.append(cont)
-                    self.detected_footers.append(cont)
+                    already.add(idx)
                     idx += 1
                 else:
                     break
@@ -252,23 +269,71 @@ class FooterDetector:
         Classify all footer/header elements on one page.
 
         Results are appended to ``self.detected_footers`` and also returned.
-        Call ``reset()`` between documents.
+        Call ``reset()`` between pages (within a document).
         """
         lines       = page_text.split('\n')
         total       = len(lines)
         if total == 0:
+            self._continuation_pending = False
             return []
         # Ensure at least 1 line is examined at each end even on short pages.
         header_end   = max(1, int(total * self.page_height_ratio))
         footer_start = min(total - 1, int(total * (1 - self.page_height_ratio)))
         footers: List[DetectedFooter] = []
 
+        # ── Cross-page footnote continuation from previous page ─────────
+        # When the previous page ended with a footnote line containing the
+        # Arabic page-break marker (line ending in ``=`` or `` -``), the
+        # continuation starts at the top of this page with ``=`` or ``- ``.
+        cross_page_indices: set = set()
+        if self._continuation_pending:
+            self._continuation_pending = False
+            for idx in range(min(total, 12)):
+                line = lines[idx]
+                if not line.strip():
+                    continue
+                s = self._clean_bidi_marks(line).strip()
+                is_cross = (
+                    s.startswith('=') or
+                    (s.startswith('-') and len(s) > 1 and s[1] in ' \t')
+                )
+                if is_cross:
+                    cross = DetectedFooter(
+                        text=s, footer_type=FooterType.FOOTNOTE,
+                        confidence=0.80, page_num=page_num,
+                        line_index=idx, original_line=line,
+                    )
+                    footers.append(cross)
+                    cross_page_indices.add(idx)
+                    # Link continuation lines immediately following
+                    c_idx = idx + 1
+                    while c_idx < len(lines) and c_idx < idx + 15:
+                        c_line = lines[c_idx].strip()
+                        if not c_line:
+                            break
+                        c_cleaned = self._clean_bidi_marks(c_line)
+                        is_new = (
+                            re.match(r'^[\(\[\{]\s*[٠-٩۰-۹0-9]\s*[\)\]\}]', c_cleaned) or
+                            re.match(r'^[\)\]\}]\s*[٠-٩۰-۹0-9]\s*[\(\[\{]', c_cleaned)
+                        )
+                        if is_new:
+                            break
+                        cont = DetectedFooter(
+                            text=c_line, footer_type=FooterType.FOOTNOTE,
+                            confidence=0.70, page_num=page_num,
+                            line_index=c_idx, original_line=lines[c_idx],
+                        )
+                        footers.append(cont)
+                        cross_page_indices.add(c_idx)
+                        c_idx += 1
+                    break  # only one cross-page block per page
+
         # ── Bottom region: footnotes → page numbers → separators ────────
         # Footnote is checked first: a line like (١) is a footnote marker,
         # NOT a page number, even though it contains an Arabic digit.
         for idx in range(footer_start, total):
             line = lines[idx]
-            if not line.strip():
+            if not line.strip() or idx in cross_page_indices:
                 continue
             for check, ftype in [
                 (self._is_footnote,    FooterType.FOOTNOTE),
@@ -287,7 +352,7 @@ class FooterDetector:
         # ── Top region: running headers ──────────────────────────────────
         for idx in range(header_end):
             line = lines[idx]
-            if not line.strip():
+            if not line.strip() or idx in cross_page_indices:
                 continue
             detected, conf = self._is_running_header(line)
             if detected:
@@ -309,7 +374,7 @@ class FooterDetector:
         # bottom 15% region) are caught here.  Only the strict parenthesised-
         # digit / question-mark patterns are used — avoiding false positives on
         # body text that happens to contain a digit.
-        already_flagged = {f.line_index for f in footers}
+        already_flagged = {f.line_index for f in footers} | cross_page_indices
         for idx, line in enumerate(lines):
             if idx in already_flagged or not line.strip():
                 continue
@@ -326,6 +391,16 @@ class FooterDetector:
                 already_flagged.add(idx)
 
         footers = self._link_footnote_continuations(lines, footers, page_num)
+
+        # ── Set cross-page flag if a footnote line ends with = or `` -`` ─
+        # This signals that the footnote continues on the next page.
+        for f in footers:
+            if f.footer_type == FooterType.FOOTNOTE:
+                tail = f.text.rstrip()
+                if tail.endswith('=') or tail.endswith(' -'):
+                    self._continuation_pending = True
+                    break
+
         self.detected_footers.extend(footers)
         return footers
 
@@ -365,5 +440,11 @@ class FooterDetector:
         return '\n'.join(lines)
 
     def reset(self) -> None:
-        """Clear accumulated detections (call between documents)."""
+        """
+        Clear per-page accumulated detections.
+
+        Note: ``_continuation_pending`` is intentionally NOT cleared here —
+        it must carry over from page N to page N+1 within the same document.
+        Create a fresh ``FooterDetector()`` instance between documents.
+        """
         self.detected_footers.clear()

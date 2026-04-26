@@ -369,6 +369,9 @@ class OCREngine:
             )
             body = self._filter_ocr_garbage(body)
 
+            if header:
+                header = self._filter_ocr_garbage(header)
+
             return (header + "\n" + body) if header else body
 
         except Exception as exc:
