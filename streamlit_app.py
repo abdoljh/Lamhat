@@ -20,7 +20,9 @@ import streamlit as st
 
 # ── Phase 1 package is at ./phase1 relative to repo root ──────────────── #
 sys.path.insert(0, str(Path(__file__).parent))
-from phase1 import Phase1Pipeline, Phase1Config  # noqa: E402
+from phase1 import (  # noqa: E402
+    Phase1aPipeline, Phase1bPipeline, Phase1Config, Phase1aResult,
+)
 from phase2 import synthesize as tts_synthesize  # noqa: E402
 
 # ── Logging ───────────────────────────────────────────────────────────── #
@@ -125,12 +127,15 @@ section[data-testid="stSidebar"] h3 { color: #f0d98a !important; }
 # ── Header ────────────────────────────────────────────────────────────── #
 st.markdown("""
 <div class="app-header">
-  <div class="eyebrow">Arabic Book Brief Engine · Phase 1</div>
-  <h1>Extraction &amp; Pre-processing</h1>
-  <div class="sub">Auto-detect PDF type · OCR scanned pages · Normalise Arabic · Chunk · Generate Arabic video script</div>
+  <div class="eyebrow">Arabic Book Brief Engine · Phase 1a + 1b</div>
+  <h1>Extraction, Normalisation &amp; Script</h1>
+  <div class="sub">
+    <b>Phase 1a</b> — Ingest · OCR · LLM correction · Normalise · Save intermediate files<br>
+    <b>Phase 1b</b> — Chunk · Summarise · Generate Arabic video script
+  </div>
   <div>
     <span class="badge b-gold">Auto-Detect</span>
-    <span class="badge b-teal">Mishkal Diacritizer</span>
+    <span class="badge b-teal">LLM OCR Correction</span>
     <span class="badge b-rust">Semantic Chunking</span>
   </div>
 </div>
@@ -256,36 +261,42 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-# ── Upload ────────────────────────────────────────────────────────────── #
+# ════════════════════════════════════════════════════════════════════════ #
+#  Phase 1a — Extract & Normalise                                         #
+# ════════════════════════════════════════════════════════════════════════ #
+st.markdown("""
+<div class="app-header" style="margin-top:0">
+  <div class="eyebrow">Phase 1a</div>
+  <h1>Extract &amp; Normalise</h1>
+  <div class="sub">Ingest PDF · OCR · LLM OCR correction · Arabic normalisation · Save intermediate files</div>
+</div>
+""", unsafe_allow_html=True)
+
 col_up, col_info = st.columns([2, 1])
 with col_up:
     uploaded = st.file_uploader("Upload Arabic PDF", type=["pdf"])
 with col_info:
     st.markdown("""
-    **What Phase 1 produces:**
-    - PDF type detected (digital / scanned / mixed)
-    - Normalised Arabic text (lam-alef fixes + noise removal)
-    - Semantic chunks with chapter metadata
-    - **JSON** + **plain text** downloads
-    - 700-800 word Arabic video **script** (plain + diacritized)
+    **Phase 1a saves three files:**
+    - `*_phase1a_corrected.txt` — LLM-corrected OCR text, per page
+    - `*_phase1a_normalized.txt` — after Arabic normalisation, per page
+    - `*_phase1a.json` — structured page data for Phase 1b
     """)
 
-# ── Run ───────────────────────────────────────────────────────────────── #
 if uploaded:
-    if st.button("▶ Run Phase 1", type="primary", use_container_width=True):
-
+    if st.button("▶ Run Phase 1a", type="primary", use_container_width=True, key="p1a_run"):
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path   = Path(tmp_dir) / uploaded.name
             output_dir = Path(tmp_dir) / "output"
             output_dir.mkdir()
             tmp_path.write_bytes(uploaded.read())
 
-            progress_bar    = st.progress(0.0)
-            status_text     = st.empty()
+            progress_bar = st.progress(0.0)
+            status_text  = st.empty()
             log_lines: list[str] = []
-            log_ph          = st.empty()
+            log_ph = st.empty()
 
-            def on_progress(step: str, pct: float):
+            def on_progress_1a(step: str, pct: float):
                 progress_bar.progress(min(pct, 1.0))
                 status_text.markdown(f"**{step}**")
                 cls = "done" if pct >= 1.0 else "active"
@@ -309,39 +320,207 @@ if uploaded:
             )
 
             try:
-                result = Phase1Pipeline(config=cfg, on_progress=on_progress).run(tmp_path)
+                result_a = Phase1aPipeline(config=cfg, on_progress=on_progress_1a).run(tmp_path)
 
-                # Persist bytes to session state before temp dir is cleaned up
-                st.session_state["json_bytes"]    = result.json_path.read_bytes()
-                st.session_state["txt_bytes"]     = result.txt_path.read_bytes()
-                st.session_state["raw_txt_bytes"] = result.raw_txt_path.read_bytes()
-                st.session_state["json_name"]     = result.json_path.name
-                st.session_state["txt_name"]      = result.txt_path.name
-                st.session_state["raw_txt_name"]  = result.raw_txt_path.name
-                # Script outputs (only present when API key was supplied)
-                if result.script_path and result.script_path.exists():
-                    st.session_state["script_bytes"]      = result.script_path.read_bytes()
-                    st.session_state["script_name"]       = result.script_path.name
+                # Persist to session state before temp dir is cleaned up
+                st.session_state["phase1a_result"]           = result_a
+                st.session_state["phase1a_corrected_bytes"]  = result_a.corrected_txt_path.read_bytes()
+                st.session_state["phase1a_corrected_name"]   = result_a.corrected_txt_path.name
+                st.session_state["phase1a_normalized_bytes"] = result_a.normalized_txt_path.read_bytes()
+                st.session_state["phase1a_normalized_name"]  = result_a.normalized_txt_path.name
+                st.session_state["phase1a_json_bytes"]       = result_a.normalized_json_path.read_bytes()
+                st.session_state["phase1a_json_name"]        = result_a.normalized_json_path.name
+                st.session_state["phase1a_meta"] = {
+                    "pdf_type":    result_a.pdf_type,
+                    "total_pages": result_a.total_pages,
+                    "elapsed_sec": result_a.elapsed_sec,
+                    "warnings":    result_a.warnings,
+                }
+                status_text.success("Phase 1a complete ✓")
+
+            except Exception as exc:
+                st.error(f"Phase 1a failed: {exc}")
+                logging.exception("Phase 1a error")
+
+# ── Phase 1a results ─────────────────────────────────────────────────── #
+if "phase1a_meta" in st.session_state:
+    meta_a = st.session_state["phase1a_meta"]
+
+    for w in meta_a["warnings"]:
+        st.markdown(f"<div class='warn-card'>⚠ {w}</div>", unsafe_allow_html=True)
+
+    type_colors = {"digital": "#c9a84c", "scanned": "#1e6b6b", "mixed": "#b94f2a"}
+    tc = type_colors.get(meta_a["pdf_type"], "#c9a84c")
+    st.markdown(f"""
+    <div class="metric-row">
+      <div class="metric-card">
+        <div class="val">{meta_a['total_pages']}</div><div class="lbl">Pages</div>
+      </div>
+      <div class="metric-card" style="border-top-color:{tc}">
+        <div class="val" style="font-size:1.3rem;padding-top:.3rem">{meta_a['pdf_type'].upper()}</div>
+        <div class="lbl">PDF Type</div>
+      </div>
+      <div class="metric-card purple">
+        <div class="val">{meta_a['elapsed_sec']:.1f}s</div><div class="lbl">Elapsed</div>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("#### 📥 Phase 1a Downloads")
+    a1, a2, a3 = st.columns(3)
+    with a1:
+        st.download_button(
+            "⬇ OCR-corrected text", data=st.session_state["phase1a_corrected_bytes"],
+            file_name=st.session_state["phase1a_corrected_name"],
+            mime="text/plain", use_container_width=True,
+            help="LLM-corrected OCR output, before Arabic normalisation",
+        )
+    with a2:
+        st.download_button(
+            "⬇ Normalized text", data=st.session_state["phase1a_normalized_bytes"],
+            file_name=st.session_state["phase1a_normalized_name"],
+            mime="text/plain", use_container_width=True,
+            help="After Arabic normalisation — input to Phase 1b chunking",
+        )
+    with a3:
+        st.download_button(
+            "⬇ Phase 1a JSON", data=st.session_state["phase1a_json_bytes"],
+            file_name=st.session_state["phase1a_json_name"],
+            mime="application/json", use_container_width=True,
+            help="Structured page data — upload to Phase 1b to skip re-running OCR",
+        )
+
+    with st.expander("🔬 Compare: corrected vs normalised"):
+        st.caption("Left = after LLM OCR correction · Right = after Arabic normalisation")
+        rc1, rc2 = st.columns(2)
+        with rc1:
+            st.markdown("**OCR-corrected**")
+            corr_txt = st.session_state.get("phase1a_corrected_bytes", b"").decode("utf-8", errors="replace")
+            st.text_area("corr", corr_txt[:4000], height=300, label_visibility="collapsed")
+        with rc2:
+            st.markdown("**Normalised**")
+            norm_txt = st.session_state.get("phase1a_normalized_bytes", b"").decode("utf-8", errors="replace")
+            st.text_area("norm", norm_txt[:4000], height=300, label_visibility="collapsed")
+
+# ════════════════════════════════════════════════════════════════════════ #
+#  Phase 1b — Chunk & Summarise                                           #
+# ════════════════════════════════════════════════════════════════════════ #
+st.markdown("---")
+st.markdown("""
+<div class="app-header" style="margin-top:1rem">
+  <div class="eyebrow">Phase 1b</div>
+  <h1>Chunk &amp; Summarise</h1>
+  <div class="sub">Semantic chunking · Hierarchical summarisation · Arabic video script (625–850 words)</div>
+  <div>
+    <span class="badge b-teal">Mishkal Diacritizer</span>
+    <span class="badge b-rust">Semantic Chunking</span>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+p1b_source = st.radio(
+    "Input source",
+    ["Phase 1a session result", "Upload *_phase1a.json"],
+    horizontal=True,
+    key="p1b_source",
+    help=(
+        "**Session result** — use the Phase 1a output from this session (no re-upload needed).\n\n"
+        "**Upload JSON** — load a *_phase1a.json file saved from a previous Phase 1a run. "
+        "Lets you re-run chunking and summarisation without repeating OCR."
+    ),
+)
+
+_p1b_ready = False
+_p1b_source_obj = None   # Phase1aResult or Path
+
+if p1b_source == "Phase 1a session result":
+    if "phase1a_result" not in st.session_state:
+        st.info("Run Phase 1a above first, or switch to **Upload \\*_phase1a.json**.")
+    else:
+        meta_a = st.session_state.get("phase1a_meta", {})
+        st.caption(
+            f"Session result: {meta_a.get('total_pages', '?')} pages · "
+            f"{meta_a.get('pdf_type', '?')} · {meta_a.get('elapsed_sec', 0):.1f}s"
+        )
+        _p1b_source_obj = st.session_state["phase1a_result"]
+        _p1b_ready = True
+else:
+    p1b_json_up = st.file_uploader(
+        "Upload *_phase1a.json", type=["json"], key="p1b_json_up",
+        help="Download this file from a previous Phase 1a run, then upload it here.",
+    )
+    if p1b_json_up:
+        # Write to a temp file so Phase1bPipeline._load_phase1a_json can read it
+        _p1b_tmp = Path(tempfile.mkdtemp()) / p1b_json_up.name
+        _p1b_tmp.write_bytes(p1b_json_up.read())
+        _p1b_source_obj = _p1b_tmp
+        _p1b_ready = True
+
+if _p1b_ready:
+    if st.button("▶ Run Phase 1b", type="primary", use_container_width=True, key="p1b_run"):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            output_dir = Path(tmp_dir) / "output"
+            output_dir.mkdir()
+
+            progress_bar_b = st.progress(0.0)
+            status_text_b  = st.empty()
+            log_lines_b: list[str] = []
+            log_ph_b = st.empty()
+
+            def on_progress_1b(step: str, pct: float):
+                progress_bar_b.progress(min(pct, 1.0))
+                status_text_b.markdown(f"**{step}**")
+                cls = "done" if pct >= 1.0 else "active"
+                log_lines_b.append(f"<span class='{cls}'>{'✓' if pct>=1.0 else '›'} {step}</span>")
+                log_ph_b.markdown(
+                    "<div class='step-log'>" + "<br>".join(log_lines_b) + "</div>",
+                    unsafe_allow_html=True,
+                )
+
+            cfg_b = Phase1Config(
+                max_tokens=max_tokens, overlap_tokens=overlap_tokens,
+                output_dir=str(output_dir),
+                anthropic_api_key=anthropic_key,
+                script_genre=script_genre,
+                book_author=book_author,
+                book_pages=int(book_pages),
+                book_structure=book_structure,
+            )
+
+            try:
+                result_b = Phase1bPipeline(config=cfg_b, on_progress=on_progress_1b).run(
+                    _p1b_source_obj
+                )
+
+                st.session_state["json_bytes"]    = result_b.json_path.read_bytes()
+                st.session_state["txt_bytes"]     = result_b.txt_path.read_bytes()
+                st.session_state["raw_txt_bytes"] = result_b.raw_txt_path.read_bytes()
+                st.session_state["json_name"]     = result_b.json_path.name
+                st.session_state["txt_name"]      = result_b.txt_path.name
+                st.session_state["raw_txt_name"]  = result_b.raw_txt_path.name
+                if result_b.script_path and result_b.script_path.exists():
+                    st.session_state["script_bytes"] = result_b.script_path.read_bytes()
+                    st.session_state["script_name"]  = result_b.script_path.name
                 else:
                     st.session_state.pop("script_bytes", None)
                     st.session_state.pop("script_name", None)
-                if result.script_diac_path and result.script_diac_path.exists():
-                    st.session_state["script_diac_bytes"] = result.script_diac_path.read_bytes()
-                    st.session_state["script_diac_name"]  = result.script_diac_path.name
+                if result_b.script_diac_path and result_b.script_diac_path.exists():
+                    st.session_state["script_diac_bytes"] = result_b.script_diac_path.read_bytes()
+                    st.session_state["script_diac_name"]  = result_b.script_diac_path.name
                 else:
                     st.session_state.pop("script_diac_bytes", None)
                     st.session_state.pop("script_diac_name", None)
-                if result.script_meta_path and result.script_meta_path.exists():
-                    st.session_state["script_meta_bytes"] = result.script_meta_path.read_bytes()
-                    st.session_state["script_meta_name"]  = result.script_meta_path.name
+                if result_b.script_meta_path and result_b.script_meta_path.exists():
+                    st.session_state["script_meta_bytes"] = result_b.script_meta_path.read_bytes()
+                    st.session_state["script_meta_name"]  = result_b.script_meta_path.name
                 else:
                     st.session_state.pop("script_meta_bytes", None)
                     st.session_state.pop("script_meta_name", None)
                 st.session_state["result_meta"] = {
-                    "pdf_type":    result.pdf_type,
-                    "total_pages": result.total_pages,
-                    "elapsed_sec": result.elapsed_sec,
-                    "warnings":    result.warnings,
+                    "pdf_type":    result_b.pdf_type,
+                    "total_pages": result_b.total_pages,
+                    "elapsed_sec": result_b.elapsed_sec,
+                    "warnings":    result_b.warnings,
                     "chunks": [
                         {
                             "chunk_id":   c.chunk_id,
@@ -352,22 +531,22 @@ if uploaded:
                             "token_est":  c.token_est,
                             "text":       c.text,
                         }
-                        for c in result.chunks
+                        for c in result_b.chunks
                     ],
                 }
-                status_text.success("Phase 1 complete ✓")
+                status_text_b.success("Phase 1b complete ✓")
 
             except Exception as exc:
-                st.error(f"Pipeline failed: {exc}")
-                logging.exception("Phase 1 error")
+                st.error(f"Phase 1b failed: {exc}")
+                logging.exception("Phase 1b error")
 
-# ── Results ───────────────────────────────────────────────────────────── #
+# ── Phase 1b results ─────────────────────────────────────────────────── #
 if "result_meta" in st.session_state:
     meta   = st.session_state["result_meta"]
     chunks = meta["chunks"]
 
     st.markdown("---")
-    st.markdown("### Results")
+    st.markdown("### Phase 1b Results")
 
     for w in meta["warnings"]:
         st.markdown(f"<div class='warn-card'>⚠ {w}</div>", unsafe_allow_html=True)
@@ -397,7 +576,6 @@ if "result_meta" in st.session_state:
     </div>
     """, unsafe_allow_html=True)
 
-    # Downloads — extraction outputs
     st.markdown("#### 📥 Downloads")
     c1, c2, c3 = st.columns(3)
     with c1:
@@ -414,16 +592,14 @@ if "result_meta" in st.session_state:
                            mime="text/plain", use_container_width=True,
                            help="Text straight from PyMuPDF/OCR before any normalisation")
 
-    # Downloads — script outputs (only shown when script was generated)
     if "script_bytes" in st.session_state:
         st.markdown("#### 📝 Arabic Video Script")
-        # Show metadata summary
         if "script_meta_bytes" in st.session_state:
             try:
                 smeta = json.loads(st.session_state["script_meta_bytes"])
-                scores = smeta.get("scores", {})
-                total  = smeta.get("total_score", 0)
-                wc     = smeta.get("word_count", 0)
+                scores  = smeta.get("scores", {})
+                total   = smeta.get("total_score", 0)
+                wc      = smeta.get("word_count", 0)
                 retries = smeta.get("retries_used", 0)
                 score_bar = " · ".join(f"{k} {v}/10" for k, v in scores.items())
                 st.markdown(
@@ -447,11 +623,13 @@ if "result_meta" in st.session_state:
                                file_name=st.session_state["script_name"],
                                mime="text/plain", use_container_width=True)
         with sc2:
-            st.download_button("⬇ Script (diacritized)", data=st.session_state.get("script_diac_bytes", b""),
+            st.download_button("⬇ Script (diacritized)",
+                               data=st.session_state.get("script_diac_bytes", b""),
                                file_name=st.session_state.get("script_diac_name", "script_diac.txt"),
                                mime="text/plain", use_container_width=True)
         with sc3:
-            st.download_button("⬇ Script metadata", data=st.session_state.get("script_meta_bytes", b""),
+            st.download_button("⬇ Script metadata",
+                               data=st.session_state.get("script_meta_bytes", b""),
                                file_name=st.session_state.get("script_meta_name", "script_meta.json"),
                                mime="application/json", use_container_width=True)
 
@@ -466,7 +644,6 @@ if "result_meta" in st.session_state:
     elif anthropic_key:
         st.info("Script generation ran but produced no output — check warnings above.")
 
-    # Chunk preview
     st.markdown("#### 🔍 Chunk Preview")
     n = st.slider("Chunks to preview", 1, min(20, len(chunks)), 5)
     for c in chunks[:n]:
@@ -483,7 +660,7 @@ if "result_meta" in st.session_state:
             unsafe_allow_html=True,
         )
 
-    with st.expander("🔬 Compare: raw extract vs processed"):
+    with st.expander("🔬 Compare: raw extract vs normalised"):
         st.caption("Left = straight from PyMuPDF/OCR · Right = after normalisation")
         rc1, rc2 = st.columns(2)
         with rc1:
