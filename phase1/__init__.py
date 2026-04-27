@@ -4,6 +4,20 @@
 # Keeping this minimal prevents import-time crashes when optional
 # dependencies (fitz, easyocr, arabic_reshaper …) are not yet installed.
 
-from .pipeline import Phase1Pipeline, Phase1Config, Phase1Result  # noqa: F401
+from .pipeline import (  # noqa: F401
+    Phase1Config,
+    Phase1aResult,
+    Phase1aPipeline,
+    Phase1bPipeline,
+    Phase1Pipeline,
+    Phase1Result,
+)
 
-__all__ = ["Phase1Pipeline", "Phase1Config", "Phase1Result"]
+__all__ = [
+    "Phase1Config",
+    "Phase1aResult",
+    "Phase1aPipeline",
+    "Phase1bPipeline",
+    "Phase1Pipeline",
+    "Phase1Result",
+]
