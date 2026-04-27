@@ -17,10 +17,10 @@ python-bidi>=0.6.0
 #   System packages in packages.txt: tesseract-ocr + tesseract-ocr-ara
 pytesseract>=0.3.10
 # EasyOCR: good accuracy but needs ~1 GB RAM (PyTorch) — local use only:
-# easyocr>=1.7.1
+easyocr>=1.7.1
 # PaddleOCR: best Arabic accuracy but no Python 3.14 wheels — local only:
-# paddlepaddle>=2.6.0
-# paddleocr>=2.7.0
+paddlepaddle>=2.6.0
+paddleocr>=2.7.0
 # Tesseract (lightweight, needs system tesseract-ocr + arabic language pack):
 # pytesseract>=0.3.10
 #
