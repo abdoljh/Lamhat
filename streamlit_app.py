@@ -145,19 +145,6 @@ st.markdown("""
 with st.sidebar:
     st.markdown("### ⚙️ Configuration")
 
-    st.markdown("#### PDF Processing Mode")
-    pdf_mode = st.radio(
-        "Mode",
-        ["auto", "digital", "ocr"],
-        index=0,
-        horizontal=True,
-        help=(
-            "**auto** — detect per page (default).\n\n"
-            "**digital** — force PyMuPDF text extraction on all pages.\n\n"
-            "**ocr** — force OCR on all pages (ignores embedded text)."
-        ),
-    )
-
     st.markdown("#### OCR")
     ocr_backend = st.selectbox(
         "OCR Backend",
@@ -170,7 +157,7 @@ with st.sidebar:
         ),
     )
     ocr_gpu = st.toggle("Use GPU for OCR", value=False)
-    ocr_dpi = st.slider("Scan DPI", 150, 500, 400, step=50)
+    ocr_dpi = st.slider("Scan DPI", 150, 600, 400, step=50)
     ocr_correction = st.toggle(
         "LLM OCR correction (scanned pages)",
         value=True,
@@ -215,6 +202,15 @@ with st.sidebar:
         "Book Structure",
         placeholder="e.g. مقدمة و١٦ فصلاً وملاحق",
         help="Brief Arabic description of chapters / sections / appendices.",
+    )
+    diacritize_script = st.toggle(
+        "Diacritise script (Mishkal)",
+        value=True,
+        help=(
+            "Apply Mishkal diacritisation to the final script and save "
+            "*_script_diacritized.txt. Turn off to skip diacritisation and "
+            "save a few seconds per run."
+        ),
     )
 
     st.markdown("---")
@@ -307,7 +303,7 @@ if uploaded:
                 )
 
             cfg = Phase1Config(
-                pdf_mode=pdf_mode,
+                pdf_mode="ocr",
                 ocr_gpu=ocr_gpu, ocr_backend=ocr_backend, ocr_dpi=ocr_dpi,
                 ocr_correction=ocr_correction,
                 max_tokens=max_tokens, overlap_tokens=overlap_tokens,
@@ -317,6 +313,7 @@ if uploaded:
                 book_author=book_author,
                 book_pages=int(book_pages),
                 book_structure=book_structure,
+                diacritize=diacritize_script,
             )
 
             try:
@@ -420,13 +417,13 @@ st.markdown("""
 
 p1b_source = st.radio(
     "Input source",
-    ["Phase 1a session result", "Upload *_phase1a.json"],
+    ["Phase 1a session result", "Upload User Corrected (.txt)"],
     horizontal=True,
     key="p1b_source",
     help=(
         "**Session result** — use the Phase 1a output from this session (no re-upload needed).\n\n"
-        "**Upload JSON** — load a *_phase1a.json file saved from a previous Phase 1a run. "
-        "Lets you re-run chunking and summarisation without repeating OCR."
+        "**Upload User Corrected** — upload a plain .txt file you edited manually. "
+        "The entire file is treated as a single normalised page and fed directly to chunking."
     ),
 )
 
@@ -435,7 +432,7 @@ _p1b_source_obj = None   # Phase1aResult or Path
 
 if p1b_source == "Phase 1a session result":
     if "phase1a_result" not in st.session_state:
-        st.info("Run Phase 1a above first, or switch to **Upload \\*_phase1a.json**.")
+        st.info("Run Phase 1a above first, or switch to **Upload User Corrected**.")
     else:
         meta_a = st.session_state.get("phase1a_meta", {})
         st.caption(
@@ -445,16 +442,36 @@ if p1b_source == "Phase 1a session result":
         _p1b_source_obj = st.session_state["phase1a_result"]
         _p1b_ready = True
 else:
-    p1b_json_up = st.file_uploader(
-        "Upload *_phase1a.json", type=["json"], key="p1b_json_up",
-        help="Download this file from a previous Phase 1a run, then upload it here.",
+    p1b_txt_up = st.file_uploader(
+        "Upload corrected text (.txt)",
+        type=["txt"],
+        key="p1b_txt_up",
+        help=(
+            "Upload a plain UTF-8 .txt file containing the corrected Arabic text. "
+            "The entire file is treated as one page — no OCR re-run needed."
+        ),
     )
-    if p1b_json_up:
-        # Write to a temp file so Phase1bPipeline._load_phase1a_json can read it
-        _p1b_tmp = Path(tempfile.mkdtemp()) / p1b_json_up.name
-        _p1b_tmp.write_bytes(p1b_json_up.read())
-        _p1b_source_obj = _p1b_tmp
+    if p1b_txt_up:
+        txt_content = p1b_txt_up.read().decode("utf-8", errors="replace")
+        _p1b_source_obj = Phase1aResult(
+            source_path          = p1b_txt_up.name,
+            pdf_type             = "scanned",
+            total_pages          = 1,
+            metadata             = {"title": Path(p1b_txt_up.name).stem},
+            pages                = [
+                {
+                    "page_number":  1,
+                    "pdf_type":     "scanned",
+                    "raw_text":     txt_content,
+                    "raw_text_pre": "",
+                }
+            ],
+            corrected_txt_path   = Path(tempfile.gettempdir()) / "dummy_corrected.txt",
+            normalized_txt_path  = Path(tempfile.gettempdir()) / "dummy_normalized.txt",
+            normalized_json_path = Path(tempfile.gettempdir()) / "dummy_phase1a.json",
+        )
         _p1b_ready = True
+        st.caption(f"Loaded: {p1b_txt_up.name} — {len(txt_content.split())} words")
 
 if _p1b_ready:
     if st.button("▶ Run Phase 1b", type="primary", use_container_width=True, key="p1b_run"):
@@ -485,6 +502,7 @@ if _p1b_ready:
                 book_author=book_author,
                 book_pages=int(book_pages),
                 book_structure=book_structure,
+                diacritize=diacritize_script,
             )
 
             try:
