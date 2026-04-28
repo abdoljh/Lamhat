@@ -1,0 +1,12 @@
+# Phase 1 RAW EXTRACT — ref_5_9.txt
+# PDF Type   : scanned
+# Total pages: 1
+# Title      : ref_5_9
+# Author     : N/A
+# NOTE       : This is the text BEFORE normalisation or diacritization.
+#              Compare with *_phase1.txt to audit processing quality.
+
+[Page 001 | scanned]
+(empty)
+
+════════════════════════════════════════════════════════════
