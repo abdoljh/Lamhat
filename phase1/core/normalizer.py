@@ -248,19 +248,18 @@ class ArabicTextNormalizer:
         text = text.replace('\u06BE', '\u0647')   # ھ → ه
         text = text.replace('\u06CC', '\u064A')   # ی → ي
 
-        # Apply article fix word-by-word
-        text = " ".join(fix_article(w) for w in text.split(" "))
-
-        # Fix word-internal double-alef-before-lam: اال → الا
-        # This artifact arises when a lam-alef ligature's two code points share
-        # the same PDF origin x, so x-DESC sort leaves them adjacent rather than
-        # interleaving the ل between them (e.g. المجاالت → المجالات).
-        # ا+ا+ل is not a valid sequence in any Arabic word, so this is safe.
-        text = " ".join(
-            w.replace('\u0627\u0627\u0644', '\u0627\u0644\u0627')
-            for w in text.split(" ")
-        )
-
+        # Article fix and double-alef-before-lam correction are digital-PDF-only.
+        # Both target font ToUnicode table encoding artifacts (e.g. امل→الم,
+        # اال→الا) that OCR engines never produce. Applying them to scanned text
+        # corrupts valid Arabic words:
+        #   Rule B len>=4: إليها → الإيها  (إ+ل+ي+ه+ا triggers the long-word branch)
+        #   Rule A:       اطلاعاً → الطاعاً  (ا+ط+ل fires the article-swap rule)
+        if source == "digital":
+            text = " ".join(fix_article(w) for w in text.split(" "))
+            text = " ".join(
+                w.replace('\u0627\u0627\u0644', '\u0627\u0644\u0627')
+                for w in text.split(" ")
+            )
         # NOTE: reshape + bidi (arabic-reshaper / python-bidi) are NOT applied
         # to scanned text.  OCR engines (Tesseract, EasyOCR, PaddleOCR) already
         # output clean logical-order Unicode (U+0600–U+06FF).  Applying reshape

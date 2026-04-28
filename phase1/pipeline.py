@@ -271,19 +271,8 @@ class Phase1aPipeline:
 
     @staticmethod
     def _write_normalized_txt(ingestion: IngestionResult, path: Path) -> None:
-        src   = Path(ingestion.source_path).name
-        lines = [
-            f"# Phase 1a NORMALIZED — {src}",
-            f"# PDF Type   : {ingestion.pdf_type}",
-            f"# Total pages: {ingestion.total_pages}",
-            "# NOTE: text after Arabic normalisation; input to Phase 1b chunking.",
-            "",
-        ]
-        for page in ingestion.pages:
-            lines.append(f"[Page {page.page_number:03d} | {page.pdf_type}]")
-            lines.append(page.raw_text or "(empty)")
-            lines.append(_PAGE_SEP)
-        path.write_text("\n".join(lines), encoding="utf-8")
+        blocks = [p.raw_text.strip() for p in ingestion.pages if p.raw_text.strip()]
+        path.write_text("\n\n".join(blocks), encoding="utf-8")
 
     @staticmethod
     def _write_normalized_json(
