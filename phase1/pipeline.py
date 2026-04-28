@@ -68,6 +68,10 @@ class Phase1Config:
     book_author:    str    = ""   # e.g. "تحقيق وتقديم نجدة فتحي صفوة"
     book_pages:     int    = 0    # actual page count (0 = omit from script)
     book_structure: str    = ""   # e.g. "مقدمة و١٦ فصلاً وملاحق"
+    # Diacritisation (Mishkal) of the final script.
+    # When False, the diacritized script file is not written and _script_diacritized.txt
+    # is omitted.  Set to False when you don't need Mishkal output to save ~2 s per run.
+    diacritize:     bool   = True
 
 
 # ──────────────────────────────────────────────────────────────────────────── #
@@ -355,6 +359,7 @@ class Phase1bPipeline:
                     book_author    = self.cfg.book_author,
                     book_pages     = self.cfg.book_pages,
                     book_structure = self.cfg.book_structure,
+                    diacritize     = self.cfg.diacritize,
                 )
                 self._progress("Writing script (Scriptwriter) …", 0.80)
                 script_path, script_diac_path, script_meta_path = summarizer.run(

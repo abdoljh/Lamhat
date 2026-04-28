@@ -74,6 +74,7 @@ class BookSummarizer:
         book_author:    str = "",
         book_pages:     int = 0,
         book_structure: str = "",
+        diacritize:     bool = True,
     ):
         self.api_key        = api_key
         self.genre          = genre
@@ -82,6 +83,7 @@ class BookSummarizer:
         self.book_author    = book_author
         self.book_pages     = book_pages
         self.book_structure = book_structure
+        self.diacritize     = diacritize
         self._client        = None   # lazy
 
     # ------------------------------------------------------------------ #
@@ -115,11 +117,7 @@ class BookSummarizer:
         result.script     = self._clean_script(result.script)
         result.word_count = len(result.script.split())
 
-        # Step 7: Diacritize the cleaned script
-        _prog("Diacritizing script …", 0.92)
-        result.script_diac = self._diacritize(result.script)
-
-        # Write files
+        # Step 7: Diacritize the cleaned script (optional — controlled by self.diacritize)
         stem        = Path(title).stem if title else "book"
         safe_stem   = re.sub(r'[^\w\u0600-\u06FF\-]', '_', stem)[:50] or "book"
         script_path      = self.output_dir / f"{safe_stem}_script.txt"
@@ -127,7 +125,13 @@ class BookSummarizer:
         script_meta_path = self.output_dir / f"{safe_stem}_script_metadata.json"
 
         script_path.write_text(result.script, encoding="utf-8")
-        script_diac_path.write_text(result.script_diac, encoding="utf-8")
+
+        if self.diacritize:
+            _prog("Diacritizing script …", 0.92)
+            result.script_diac = self._diacritize(result.script)
+            script_diac_path.write_text(result.script_diac, encoding="utf-8")
+        else:
+            script_diac_path = None
         script_meta_path.write_text(
             json.dumps({
                 "title":          title,
