@@ -1,43 +1,41 @@
-# ── Arabic Book Brief Engine — Phase 1 ────────────────────────────────
+# ── Arabic Book Brief Engine — Phase 1a (OCR) + Phase 1b (Summarisation) ──
 # Streamlit Community Cloud reads requirements.txt from the repo root.
+# Python 3.12 is required (set in runtime.txt / Advanced settings at deploy time).
 
 # Core UI
 streamlit>=1.35.0
 
-# PDF extraction
+# PDF rendering
 PyMuPDF>=1.24.0
-pdf2image>=1.17.0        # poppler-based rendering for scanned pages (full MediaBox)
+pdf2image>=1.17.0        # poppler-based rendering (poppler-utils in packages.txt)
 
-# Arabic text correction
+# Arabic text processing
 arabic-reshaper>=3.0.0
 python-bidi>=0.6.0
 
-# OCR — scanned PDFs
-# Tesseract: lightweight, fits Streamlit Cloud 1 GB RAM limit.
-#   System packages in packages.txt: tesseract-ocr + tesseract-ocr-ara
-pytesseract>=0.3.10
-# EasyOCR: good accuracy but needs ~1 GB RAM (PyTorch) — local use only:
-easyocr>=1.7.1
-# PaddleOCR: best Arabic accuracy but no Python 3.14 wheels — local only:
-# paddlepaddle>=2.6.0
-# paddleocr>=2.7.0
-# Tesseract (lightweight, needs system tesseract-ocr + arabic language pack):
-# pytesseract>=0.3.10
-#
-# Shared image utilities used by all backends:
+# ── Phase 1a — Kraken OCR ────────────────────────────────────────────────
+# Kraken 7.0.1 requires Python < 3.14 and pytorch-lightning.
+# lightning was quarantined on PyPI 2026-04-30 — use the local shim instead.
+torch>=2.4.0,<=2.10.0
+lightning @ ./lightning-compat
+kraken==7.0.1
+
+# Image processing (used by Kraken pipeline and page export)
 Pillow>=10.0.0
 numpy>=1.24.0
+opencv-python-headless>=4.8.0
+scipy>=1.11.0            # NLBin binarization in kraken_engine.py
 
+# ── Phase 1b — Summarisation & Script generation ─────────────────────────
 # Diacritization (applied only to final script, not raw OCR text)
-# Mishkal: local, no API cost, good for clean MSA text.
-# farasapy: higher accuracy but requires Java — local dev only.
 mishkal
-# farasapy>=0.1.1
 
 # LLM summarization & script generation
 anthropic>=0.40.0
 
 # ── Phase 2 — Audio Generation ──────────────────────────────────────────
-# TTS backends
-gTTS>=2.5.0            # free Google TTS fallback (development use, lang='ar')
-# elevenlabs>=1.0.0    # premium Arabic voices — install locally when needed
+gTTS>=2.5.0              # free Google TTS fallback (lang='ar')
+# elevenlabs>=1.0.0      # premium Arabic voices — install locally when needed
+
+# ── Phase 3 — Visual Generation ─────────────────────────────────────────
+# (No extra deps beyond those above — phase3 uses requests, Pillow, ffmpeg)

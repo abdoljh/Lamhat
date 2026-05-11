@@ -130,12 +130,12 @@ st.markdown("""
   <div class="eyebrow">Arabic Book Brief Engine · Phase 1a + 1b</div>
   <h1>Extraction, Normalisation &amp; Script</h1>
   <div class="sub">
-    <b>Phase 1a</b> — Ingest · OCR · LLM correction · Normalise · Save intermediate files<br>
+    <b>Phase 1a</b> — Strip margins · Export page images · Kraken OCR · Normalise<br>
     <b>Phase 1b</b> — Chunk · Summarise · Generate Arabic video script
   </div>
   <div>
-    <span class="badge b-gold">Auto-Detect</span>
-    <span class="badge b-teal">LLM OCR Correction</span>
+    <span class="badge b-gold">Header/Footer Stripping</span>
+    <span class="badge b-teal">Kraken Offline OCR</span>
     <span class="badge b-rust">Semantic Chunking</span>
   </div>
 </div>
@@ -145,28 +145,56 @@ st.markdown("""
 with st.sidebar:
     st.markdown("### ⚙️ Configuration")
 
-    st.markdown("#### OCR")
-    ocr_backend = st.selectbox(
-        "OCR Backend",
-        ["tesseract", "easyocr", "paddleocr"],
-        index=0,
-        help=(
-            "**Tesseract** — lightweight, works on Streamlit Cloud.\n\n"
-            "**EasyOCR** — better accuracy but needs ~1 GB RAM (PyTorch); local only.\n\n"
-            "**PaddleOCR** — best Arabic accuracy; requires Python ≤ 3.12; local only."
-        ),
-    )
-    ocr_gpu = st.toggle("Use GPU for OCR", value=False)
-    ocr_dpi = st.slider("Scan DPI", 150, 600, 400, step=50)
-    ocr_correction = st.toggle(
-        "LLM OCR correction (scanned pages)",
+    st.markdown("#### Phase 1a — PDF Preprocessing")
+    strip_margins = st.toggle(
+        "Strip headers/footers",
         value=True,
         help=(
-            "After Tesseract, send each scanned page through Claude Haiku to fix "
-            "OCR errors and join broken lines into flowing paragraphs. "
-            "Requires an Anthropic API key. Cost: ~$0.001 per page."
+            "Automatically detect and remove running headers, footers, and footnote "
+            "separators before exporting page images. Uses ink-density analysis."
         ),
     )
+    _ocr_backend_options = {
+        "Kraken (offline, Arabic model)": "kraken",
+        "None (export images only)": "none",
+    }
+    _ocr_backend_label = st.selectbox(
+        "OCR Backend",
+        list(_ocr_backend_options.keys()),
+        index=0,
+        help=(
+            "**Kraken** — offline Arabic OCR using the OpenITI apt-20221130 model. "
+            "Best quality, runs fully on Streamlit Cloud, no extra API cost.\n\n"
+            "**None** — export clean page images only. Download the ZIP, run OCR "
+            "externally, then upload the text to Phase 1b."
+        ),
+    )
+    ocr_backend = _ocr_backend_options[_ocr_backend_label]
+    ocr_dpi = st.slider("Scan DPI", 150, 600, 400, step=50)
+
+    # Kraken-specific controls
+    kraken_bidi      = "auto"
+    kraken_threshold = 0.5
+    kraken_pad       = 16
+    if ocr_backend == "kraken":
+        _bidi_map = {
+            "Auto (let kraken decide)": "auto",
+            "Force RTL": "R",
+            "Force LTR": "L",
+            "Off (raw display order)": "off",
+        }
+        kraken_bidi      = _bidi_map[st.selectbox(
+            "Bidi reordering", list(_bidi_map.keys()), index=0,
+            help="Controls how Kraken reorders bidirectional text. Auto is correct for Arabic.",
+        )]
+        kraken_threshold = st.slider(
+            "Binarization threshold", 1, 99, 50,
+            help="Higher = darker pixels counted as ink. 50 is a good default.",
+        ) / 100.0
+        kraken_pad = st.slider(
+            "Line padding (px)", 0, 64, 16, step=4,
+            help="Pixels of padding added around each detected text line.",
+        )
 
     st.markdown("#### Chunking")
     max_tokens     = st.slider("Max Tokens / Chunk", 500, 3000, 1500, step=100)
@@ -269,13 +297,20 @@ with st.sidebar:
     )
 
 # ════════════════════════════════════════════════════════════════════════ #
-#  Phase 1a — Extract & Normalise                                         #
+#  Phase 1a — PDF Preprocessing & OCR                                     #
 # ════════════════════════════════════════════════════════════════════════ #
 st.markdown("""
 <div class="app-header" style="margin-top:0">
   <div class="eyebrow">Phase 1a</div>
-  <h1>Extract &amp; Normalise</h1>
-  <div class="sub">Ingest PDF · OCR · LLM OCR correction · Arabic normalisation · Save intermediate files</div>
+  <h1>PDF Preprocessing &amp; OCR</h1>
+  <div class="sub">
+    Strip headers/footers · Export clean page images · Kraken Arabic OCR · Arabic normalisation
+  </div>
+  <div>
+    <span class="badge b-gold">Header/Footer Detection</span>
+    <span class="badge b-teal">Kraken Offline OCR</span>
+    <span class="badge b-rust">Offline Export</span>
+  </div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -284,10 +319,14 @@ with col_up:
     uploaded = st.file_uploader("Upload Arabic PDF", type=["pdf"])
 with col_info:
     st.markdown("""
-    **Phase 1a saves three files:**
-    - `*_phase1a_corrected.txt` — LLM-corrected OCR text, per page
-    - `*_phase1a_normalized.txt` — after Arabic normalisation, per page
+    **Phase 1a produces:**
+    - `*_phase1a_pages.zip` — clean page images for offline OCR
+    - `*_phase1a_corrected.txt` — raw Kraken OCR text, per page
+    - `*_phase1a_normalized.txt` — after Arabic normalisation
     - `*_phase1a.json` — structured page data for Phase 1b
+
+    Use **None** backend to export images only, then upload
+    OCR text to Phase 1b via *Upload User Corrected*.
     """)
 
 if uploaded:
@@ -314,9 +353,12 @@ if uploaded:
                 )
 
             cfg = Phase1Config(
-                pdf_mode="ocr",
-                ocr_gpu=ocr_gpu, ocr_backend=ocr_backend, ocr_dpi=ocr_dpi,
-                ocr_correction=ocr_correction,
+                strip_margins    = strip_margins,
+                export_dpi       = ocr_dpi,
+                ocr_backend      = ocr_backend,
+                kraken_bidi      = kraken_bidi,
+                kraken_threshold = kraken_threshold,
+                kraken_pad       = kraken_pad,
                 max_tokens=max_tokens, overlap_tokens=overlap_tokens,
                 output_dir=str(output_dir),
                 anthropic_api_key=anthropic_key,
@@ -339,11 +381,18 @@ if uploaded:
                 st.session_state["phase1a_normalized_name"]  = result_a.normalized_txt_path.name
                 st.session_state["phase1a_json_bytes"]       = result_a.normalized_json_path.read_bytes()
                 st.session_state["phase1a_json_name"]        = result_a.normalized_json_path.name
+                if result_a.pages_zip_path and result_a.pages_zip_path.exists():
+                    st.session_state["phase1a_zip_bytes"] = result_a.pages_zip_path.read_bytes()
+                    st.session_state["phase1a_zip_name"]  = result_a.pages_zip_path.name
+                else:
+                    st.session_state.pop("phase1a_zip_bytes", None)
+                    st.session_state.pop("phase1a_zip_name", None)
                 st.session_state["phase1a_meta"] = {
                     "pdf_type":    result_a.pdf_type,
                     "total_pages": result_a.total_pages,
                     "elapsed_sec": result_a.elapsed_sec,
                     "warnings":    result_a.warnings,
+                    "ocr_backend": ocr_backend,
                 }
                 status_text.success("Phase 1a complete ✓")
 
@@ -376,31 +425,55 @@ if "phase1a_meta" in st.session_state:
     """, unsafe_allow_html=True)
 
     st.markdown("#### 📥 Phase 1a Downloads")
-    a1, a2, a3 = st.columns(3)
-    with a1:
+
+    # Page images ZIP is always available
+    if "phase1a_zip_bytes" in st.session_state:
         st.download_button(
-            "⬇ OCR-corrected text", data=st.session_state["phase1a_corrected_bytes"],
-            file_name=st.session_state["phase1a_corrected_name"],
-            mime="text/plain", use_container_width=True,
-            help="LLM-corrected OCR output, before Arabic normalisation",
-        )
-    with a2:
-        st.download_button(
-            "⬇ Normalized text", data=st.session_state["phase1a_normalized_bytes"],
-            file_name=st.session_state["phase1a_normalized_name"],
-            mime="text/plain", use_container_width=True,
-            help="After Arabic normalisation — input to Phase 1b chunking",
-        )
-    with a3:
-        st.download_button(
-            "⬇ Phase 1a JSON", data=st.session_state["phase1a_json_bytes"],
-            file_name=st.session_state["phase1a_json_name"],
-            mime="application/json", use_container_width=True,
-            help="Structured page data — upload to Phase 1b to skip re-running OCR",
+            "⬇ Page images ZIP (for offline OCR)",
+            data=st.session_state["phase1a_zip_bytes"],
+            file_name=st.session_state["phase1a_zip_name"],
+            mime="application/zip",
+            use_container_width=True,
+            help=(
+                "Header/footer-stripped page images at the chosen DPI. "
+                "Use these with any external OCR tool, then upload the result "
+                "to Phase 1b via 'Upload User Corrected'."
+            ),
         )
 
-    with st.expander("🔬 Compare: corrected vs normalised"):
-        st.caption("Left = after LLM OCR correction · Right = after Arabic normalisation")
+    # If no OCR was run in-app, guide the user to Phase 1b upload path
+    if meta_a.get("ocr_backend") == "none":
+        st.info(
+            "Page images exported. Download the ZIP, run OCR externally (e.g. with "
+            "Kraken, Google Vision, or any other tool), then upload the resulting "
+            "text file to **Phase 1b → Upload User Corrected** below."
+        )
+    else:
+        a1, a2, a3 = st.columns(3)
+        with a1:
+            st.download_button(
+                "⬇ OCR text (raw)", data=st.session_state["phase1a_corrected_bytes"],
+                file_name=st.session_state["phase1a_corrected_name"],
+                mime="text/plain", use_container_width=True,
+                help="Raw Kraken OCR output before Arabic normalisation",
+            )
+        with a2:
+            st.download_button(
+                "⬇ Normalized text", data=st.session_state["phase1a_normalized_bytes"],
+                file_name=st.session_state["phase1a_normalized_name"],
+                mime="text/plain", use_container_width=True,
+                help="After Arabic normalisation — input to Phase 1b chunking",
+            )
+        with a3:
+            st.download_button(
+                "⬇ Phase 1a JSON", data=st.session_state["phase1a_json_bytes"],
+                file_name=st.session_state["phase1a_json_name"],
+                mime="application/json", use_container_width=True,
+                help="Structured page data — upload to Phase 1b to skip re-running OCR",
+            )
+
+    with st.expander("🔬 Compare: raw OCR vs normalised"):
+        st.caption("Left = raw Kraken OCR output · Right = after Arabic normalisation")
         rc1, rc2 = st.columns(2)
         with rc1:
             st.markdown("**OCR-corrected**")
