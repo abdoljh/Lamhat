@@ -213,7 +213,9 @@ class Phase1aPipeline:
         if self.cfg.ocr_backend == "kraken" and img_paths:
             self._progress("Loading Kraken OCR model …", 0.30)
             try:
-                from .core.kraken_engine import load_model, binarize_page, ocr_page
+                from .core.kraken_engine import (
+                    load_model, binarize_page, ocr_page, KrakenNotAvailableError,
+                )
                 from PIL import Image as PILImage
                 model = load_model()
                 for i, img_path in enumerate(img_paths):
@@ -238,6 +240,10 @@ class Phase1aPipeline:
                         "raw_text_pre": text,
                     })
                 logger.info("Kraken OCR complete — %d pages", len(pages_data))
+            except KrakenNotAvailableError as exc:
+                warnings.append(str(exc))
+                logger.warning("Kraken not available: %s", exc)
+                pages_data = _empty_pages(total_pages)
             except Exception as exc:
                 warnings.append(f"Kraken OCR failed: {exc}")
                 logger.exception("Kraken OCR failed")

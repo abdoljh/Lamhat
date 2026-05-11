@@ -4,8 +4,17 @@ Kraken OCR engine for Arabic scanned PDFs.
 Uses the OpenITI apt-20221130 Arabic printed-text model.
 Extracted from the tested OCR-me / Upgrade streamlit_app.py solution.
 
+Requires Python 3.12 and the following packages:
+    torch>=2.4.0,<=2.10.0
+    lightning @ ./lightning-compat
+    kraken==7.0.1
+
+On Python 3.14 or when Kraken is not installed, import will succeed but
+load_model() will raise KrakenNotAvailableError.
+
 Public API
 ----------
+    KrakenNotAvailableError
     ensure_model() -> str
     load_model(model_path=None) -> model
     binarize_page(pil_img, threshold=0.5) -> PIL.Image
@@ -15,7 +24,6 @@ Public API
 
 from __future__ import annotations
 
-import io
 import os
 import urllib.request
 from pathlib import Path
@@ -23,6 +31,25 @@ from typing import Optional
 
 import numpy as np
 from PIL import Image
+
+# ── Availability check ───────────────────────────────────────────────────── #
+
+try:
+    import kraken  # noqa: F401
+    _KRAKEN_AVAILABLE = True
+except ImportError:
+    _KRAKEN_AVAILABLE = False
+
+
+class KrakenNotAvailableError(RuntimeError):
+    """Raised when kraken/torch are not installed (requires Python 3.12)."""
+    def __init__(self) -> None:
+        super().__init__(
+            "Kraken OCR is not installed. "
+            "It requires Python 3.12 — redeploy the Streamlit Cloud app with "
+            "Python 3.12 selected in Advanced settings, then uncomment "
+            "torch/lightning/kraken in requirements.txt."
+        )
 
 # ── Model constants ──────────────────────────────────────────────────────── #
 
@@ -53,6 +80,8 @@ def ensure_model(model_path: Optional[str] = None) -> str:
 
 def load_model(model_path: Optional[str] = None):
     """Load and return the Kraken model (downloads on first call)."""
+    if not _KRAKEN_AVAILABLE:
+        raise KrakenNotAvailableError()
     from kraken.lib import models as kraken_models
     path = ensure_model(model_path)
     return kraken_models.load_any(path)

@@ -1,6 +1,17 @@
 # ── Arabic Book Brief Engine — Phase 1a (OCR) + Phase 1b (Summarisation) ──
 # Streamlit Community Cloud reads requirements.txt from the repo root.
-# Python 3.12 is required (set in runtime.txt / Advanced settings at deploy time).
+#
+# PYTHON VERSION NOTE:
+#   Kraken OCR requires Python 3.12 (set in Advanced settings at first deploy).
+#   runtime.txt is present but Streamlit Cloud IGNORES it — version must be
+#   chosen once in the Advanced settings dialog when creating the app.
+#   On Python 3.14, torch has no pre-built wheels and will stall during
+#   install. The app runs in "export images only" mode without Kraken.
+#
+# KRAKEN INSTALLATION:
+#   torch, kraken, and lightning are commented out below so the app can start
+#   on Python 3.14 without stalling. Uncomment them ONLY when deploying on
+#   Python 3.12 (re-create the app with Python 3.12 in Advanced settings).
 
 # Core UI
 streamlit>=1.35.0
@@ -13,18 +24,20 @@ pdf2image>=1.17.0        # poppler-based rendering (poppler-utils in packages.tx
 arabic-reshaper>=3.0.0
 python-bidi>=0.6.0
 
-# ── Phase 1a — Kraken OCR ────────────────────────────────────────────────
-# Kraken 7.0.1 requires Python < 3.14 and pytorch-lightning.
-# lightning was quarantined on PyPI 2026-04-30 — use the local shim instead.
-torch>=2.4.0,<=2.10.0
-lightning @ ./lightning-compat
-kraken==7.0.1
-
-# Image processing (used by Kraken pipeline and page export)
+# Image processing (always needed for page export)
 Pillow>=10.0.0
 numpy>=1.24.0
 opencv-python-headless>=4.8.0
-scipy>=1.11.0            # NLBin binarization in kraken_engine.py
+scipy>=1.11.0            # NLBin binarization in kraken_engine.py (optional dep)
+
+# ── Phase 1a — Kraken OCR (Python 3.12 only) ─────────────────────────────
+# Uncomment these three lines when deploying on Python 3.12.
+# On Python 3.14, leave them commented — the app will offer "export images
+# only" mode and skip Kraken silently.
+#
+# torch>=2.4.0,<=2.10.0
+# lightning @ ./lightning-compat
+# kraken==7.0.1
 
 # ── Phase 1b — Summarisation & Script generation ─────────────────────────
 # Diacritization (applied only to final script, not raw OCR text)

@@ -154,14 +154,33 @@ with st.sidebar:
             "separators before exporting page images. Uses ink-density analysis."
         ),
     )
-    _ocr_backend_options = {
-        "Kraken (offline, Arabic model)": "kraken",
-        "None (export images only)": "none",
-    }
+    try:
+        from phase1.core.kraken_engine import _KRAKEN_AVAILABLE as _kraken_ok
+    except Exception:
+        _kraken_ok = False
+
+    if _kraken_ok:
+        _ocr_backend_options = {
+            "Kraken (offline, Arabic model)": "kraken",
+            "None (export images only)": "none",
+        }
+        _ocr_backend_default = 0
+    else:
+        _ocr_backend_options = {"None (export images only)": "none"}
+        _ocr_backend_default = 0
+        st.warning(
+            "⚠️ Kraken OCR is not available on this Python version. "
+            "Only image export mode is supported here. "
+            "To enable Kraken, redeploy the app with **Python 3.12** selected "
+            "in Streamlit Cloud Advanced settings, then uncomment "
+            "`torch`/`lightning`/`kraken` in `requirements.txt`.",
+            icon="🐍",
+        )
+
     _ocr_backend_label = st.selectbox(
         "OCR Backend",
         list(_ocr_backend_options.keys()),
-        index=0,
+        index=_ocr_backend_default,
         help=(
             "**Kraken** — offline Arabic OCR using the OpenITI apt-20221130 model. "
             "Best quality, runs fully on Streamlit Cloud, no extra API cost.\n\n"
