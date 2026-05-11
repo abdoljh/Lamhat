@@ -146,74 +146,120 @@ with st.sidebar:
     st.markdown("### ⚙️ Configuration")
 
     st.markdown("#### Phase 1a — PDF Preprocessing")
-    strip_margins = st.toggle(
-        "Strip headers/footers",
-        value=True,
+
+    _p1a_mode_labels = {
+        "Single Book (strip + export + OCR)": "single_book",
+        "Raw Export (no stripping, no OCR)":  "raw_export",
+    }
+    _p1a_mode_label = st.selectbox(
+        "Mode",
+        list(_p1a_mode_labels.keys()),
+        index=0,
         help=(
-            "Automatically detect and remove running headers, footers, and footnote "
-            "separators before exporting page images. Uses ink-density analysis."
+            "**Single Book** — auto-detect & strip headers/footers, export clean page "
+            "images, optionally extract footers and photographs, optionally run Kraken OCR.\n\n"
+            "**Raw Export** — export original pages as colour images with no header/footer "
+            "removal. Useful for books that have no running titles or page numbers."
         ),
     )
-    try:
-        from phase1.core.kraken_engine import _KRAKEN_AVAILABLE as _kraken_ok
-    except Exception:
-        _kraken_ok = False
+    p1a_mode = _p1a_mode_labels[_p1a_mode_label]
 
-    if _kraken_ok:
-        _ocr_backend_options = {
-            "Kraken (offline, Arabic model)": "kraken",
-            "None (export images only)": "none",
-        }
-        _ocr_backend_default = 0
-    else:
-        _ocr_backend_options = {"None (export images only)": "none"}
-        _ocr_backend_default = 0
-        st.warning(
-            "⚠️ Kraken OCR is not available on this Python version. "
-            "Only image export mode is supported here. "
-            "To enable Kraken, redeploy the app with **Python 3.12** selected "
-            "in Streamlit Cloud Advanced settings, then uncomment "
-            "`torch`/`lightning`/`kraken` in `requirements.txt`.",
-            icon="🐍",
+    strip_margins = True
+    include_footers = False
+    include_photos  = False
+    if p1a_mode == "single_book":
+        strip_margins = st.toggle(
+            "Strip headers/footers",
+            value=True,
+            help=(
+                "Automatically detect and remove running headers, footers, and footnote "
+                "separators before exporting page images. Uses ink-density analysis."
+            ),
+        )
+        include_footers = st.toggle(
+            "Extract footnotes",
+            value=True,
+            help=(
+                "Detect footnote regions on each page and export them as a labeled "
+                "PDF and a separate image ZIP. Useful for preserving citation data."
+            ),
+        )
+        include_photos = st.toggle(
+            "Extract photographs",
+            value=False,
+            help=(
+                "Detect photographic regions (and their captions) and save each as a "
+                "separate PNG in a ZIP. Uses pixel-domain dark-region segmentation — "
+                "works even when the PDF has no embedded image objects."
+            ),
         )
 
-    _ocr_backend_label = st.selectbox(
-        "OCR Backend",
-        list(_ocr_backend_options.keys()),
-        index=_ocr_backend_default,
-        help=(
-            "**Kraken** — offline Arabic OCR using the OpenITI apt-20221130 model. "
-            "Best quality, runs fully on Streamlit Cloud, no extra API cost.\n\n"
-            "**None** — export clean page images only. Download the ZIP, run OCR "
-            "externally, then upload the text to Phase 1b."
-        ),
-    )
-    ocr_backend = _ocr_backend_options[_ocr_backend_label]
+    zip_split_mb = float(st.number_input(
+        "ZIP split size (MB)",
+        min_value=50, max_value=1000, value=250, step=50,
+        help="Split the pages ZIP into parts no larger than this. 250 MB fits most tools.",
+    ))
+
     ocr_dpi = st.slider("Scan DPI", 150, 600, 400, step=50)
 
-    # Kraken-specific controls
+    # OCR backend — only shown for Single Book mode
+    ocr_backend      = "none"
     kraken_bidi      = "auto"
     kraken_threshold = 0.5
     kraken_pad       = 16
-    if ocr_backend == "kraken":
-        _bidi_map = {
-            "Auto (let kraken decide)": "auto",
-            "Force RTL": "R",
-            "Force LTR": "L",
-            "Off (raw display order)": "off",
-        }
-        kraken_bidi      = _bidi_map[st.selectbox(
-            "Bidi reordering", list(_bidi_map.keys()), index=0,
-            help="Controls how Kraken reorders bidirectional text. Auto is correct for Arabic.",
-        )]
-        kraken_threshold = st.slider(
-            "Binarization threshold", 1, 99, 50,
-            help="Higher = darker pixels counted as ink. 50 is a good default.",
-        ) / 100.0
-        kraken_pad = st.slider(
-            "Line padding (px)", 0, 64, 16, step=4,
-            help="Pixels of padding added around each detected text line.",
+    if p1a_mode == "single_book":
+        try:
+            from phase1.core.kraken_engine import _KRAKEN_AVAILABLE as _kraken_ok
+        except Exception:
+            _kraken_ok = False
+
+        if _kraken_ok:
+            _ocr_backend_options = {
+                "Kraken (offline, Arabic model)": "kraken",
+                "None (export images only)": "none",
+            }
+            _ocr_backend_default = 0
+        else:
+            _ocr_backend_options = {"None (export images only)": "none"}
+            _ocr_backend_default = 0
+            st.warning(
+                "⚠️ Kraken OCR unavailable on this Python version. "
+                "Redeploy with **Python 3.12** and uncomment "
+                "`torch`/`lightning`/`kraken` in `requirements.txt` to enable it.",
+                icon="🐍",
+            )
+
+        _ocr_backend_label = st.selectbox(
+            "OCR Backend",
+            list(_ocr_backend_options.keys()),
+            index=_ocr_backend_default,
+            help=(
+                "**Kraken** — offline Arabic OCR using the OpenITI apt-20221130 model.\n\n"
+                "**None** — export clean page images only. Download the ZIP, run OCR "
+                "externally, then upload the text to Phase 1b."
+            ),
         )
+        ocr_backend = _ocr_backend_options[_ocr_backend_label]
+
+        if ocr_backend == "kraken":
+            _bidi_map = {
+                "Auto (let kraken decide)": "auto",
+                "Force RTL": "R",
+                "Force LTR": "L",
+                "Off (raw display order)": "off",
+            }
+            kraken_bidi      = _bidi_map[st.selectbox(
+                "Bidi reordering", list(_bidi_map.keys()), index=0,
+                help="Controls how Kraken reorders bidirectional text. Auto is correct for Arabic.",
+            )]
+            kraken_threshold = st.slider(
+                "Binarization threshold", 1, 99, 50,
+                help="Higher = darker pixels counted as ink. 50 is a good default.",
+            ) / 100.0
+            kraken_pad = st.slider(
+                "Line padding (px)", 0, 64, 16, step=4,
+                help="Pixels of padding added around each detected text line.",
+            )
 
     st.markdown("#### Chunking")
     max_tokens     = st.slider("Max Tokens / Chunk", 500, 3000, 1500, step=100)
@@ -323,12 +369,12 @@ st.markdown("""
   <div class="eyebrow">Phase 1a</div>
   <h1>PDF Preprocessing &amp; OCR</h1>
   <div class="sub">
-    Strip headers/footers · Export clean page images · Kraken Arabic OCR · Arabic normalisation
+    Strip headers/footers · Export clean page images · Extract footers &amp; photographs · Kraken Arabic OCR
   </div>
   <div>
     <span class="badge b-gold">Header/Footer Detection</span>
     <span class="badge b-teal">Kraken Offline OCR</span>
-    <span class="badge b-rust">Offline Export</span>
+    <span class="badge b-rust">Photo &amp; Footer Extraction</span>
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -339,12 +385,15 @@ with col_up:
 with col_info:
     st.markdown("""
     **Phase 1a produces:**
-    - `*_phase1a_pages.zip` — clean page images for offline OCR
+    - `*_phase1a_pages[_part_N].zip` — clean page images (main text body)
+    - `*_phase1a_footers.pdf` — footnote regions assembled (optional)
+    - `*_phase1a_footers_imgs.zip` — footer image per page (optional)
+    - `*_phase1a_photos.zip` — photographs + captions (optional)
     - `*_phase1a_corrected.txt` — raw Kraken OCR text, per page
     - `*_phase1a_normalized.txt` — after Arabic normalisation
     - `*_phase1a.json` — structured page data for Phase 1b
 
-    Use **None** backend to export images only, then upload
+    Use **None** OCR backend to export images only, then upload
     OCR text to Phase 1b via *Upload User Corrected*.
     """)
 
@@ -372,7 +421,11 @@ if uploaded:
                 )
 
             cfg = Phase1Config(
+                mode             = p1a_mode,
                 strip_margins    = strip_margins,
+                include_footers  = include_footers,
+                include_photos   = include_photos,
+                zip_split_mb     = zip_split_mb,
                 export_dpi       = ocr_dpi,
                 ocr_backend      = ocr_backend,
                 kraken_bidi      = kraken_bidi,
@@ -400,18 +453,47 @@ if uploaded:
                 st.session_state["phase1a_normalized_name"]  = result_a.normalized_txt_path.name
                 st.session_state["phase1a_json_bytes"]       = result_a.normalized_json_path.read_bytes()
                 st.session_state["phase1a_json_name"]        = result_a.normalized_json_path.name
-                if result_a.pages_zip_path and result_a.pages_zip_path.exists():
-                    st.session_state["phase1a_zip_bytes"] = result_a.pages_zip_path.read_bytes()
-                    st.session_state["phase1a_zip_name"]  = result_a.pages_zip_path.name
-                else:
-                    st.session_state.pop("phase1a_zip_bytes", None)
-                    st.session_state.pop("phase1a_zip_name", None)
+
+                # Page image ZIPs (may be multi-part)
+                st.session_state["phase1a_zip_parts"] = [
+                    {"bytes": zp.read_bytes(), "name": zp.name}
+                    for zp in result_a.pages_zip_paths
+                    if zp.exists()
+                ]
+
+                # Footer outputs
+                for key in ("phase1a_footers_pdf", "phase1a_footers_zip"):
+                    st.session_state.pop(key, None)
+                if result_a.footers_pdf_path and result_a.footers_pdf_path.exists():
+                    st.session_state["phase1a_footers_pdf"] = {
+                        "bytes": result_a.footers_pdf_path.read_bytes(),
+                        "name":  result_a.footers_pdf_path.name,
+                    }
+                if result_a.footers_zip_path and result_a.footers_zip_path.exists():
+                    st.session_state["phase1a_footers_zip"] = {
+                        "bytes": result_a.footers_zip_path.read_bytes(),
+                        "name":  result_a.footers_zip_path.name,
+                    }
+
+                # Photo output
+                st.session_state.pop("phase1a_photos_zip", None)
+                if result_a.photos_zip_path and result_a.photos_zip_path.exists():
+                    st.session_state["phase1a_photos_zip"] = {
+                        "bytes": result_a.photos_zip_path.read_bytes(),
+                        "name":  result_a.photos_zip_path.name,
+                    }
+
                 st.session_state["phase1a_meta"] = {
-                    "pdf_type":    result_a.pdf_type,
-                    "total_pages": result_a.total_pages,
-                    "elapsed_sec": result_a.elapsed_sec,
-                    "warnings":    result_a.warnings,
-                    "ocr_backend": ocr_backend,
+                    "pdf_type":       result_a.pdf_type,
+                    "total_pages":    result_a.total_pages,
+                    "elapsed_sec":    result_a.elapsed_sec,
+                    "warnings":       result_a.warnings,
+                    "ocr_backend":    ocr_backend,
+                    "mode":           p1a_mode,
+                    "n_footer_pages": result_a.n_footer_pages,
+                    "n_photos":       result_a.n_photos,
+                    "asked_footers":  include_footers,
+                    "asked_photos":   include_photos,
                 }
                 status_text.success("Phase 1a complete ✓")
 
@@ -428,6 +510,19 @@ if "phase1a_meta" in st.session_state:
 
     type_colors = {"digital": "#c9a84c", "scanned": "#1e6b6b", "mixed": "#b94f2a"}
     tc = type_colors.get(meta_a["pdf_type"], "#c9a84c")
+    _extra_cards = ""
+    if meta_a.get("n_footer_pages", 0):
+        _extra_cards += (
+            f'<div class="metric-card">'
+            f'<div class="val">{meta_a["n_footer_pages"]}</div>'
+            f'<div class="lbl">Footer pages</div></div>'
+        )
+    if meta_a.get("n_photos", 0):
+        _extra_cards += (
+            f'<div class="metric-card">'
+            f'<div class="val">{meta_a["n_photos"]}</div>'
+            f'<div class="lbl">Photos</div></div>'
+        )
     st.markdown(f"""
     <div class="metric-row">
       <div class="metric-card">
@@ -437,6 +532,7 @@ if "phase1a_meta" in st.session_state:
         <div class="val" style="font-size:1.3rem;padding-top:.3rem">{meta_a['pdf_type'].upper()}</div>
         <div class="lbl">PDF Type</div>
       </div>
+      {_extra_cards}
       <div class="metric-card purple">
         <div class="val">{meta_a['elapsed_sec']:.1f}s</div><div class="lbl">Elapsed</div>
       </div>
@@ -445,23 +541,75 @@ if "phase1a_meta" in st.session_state:
 
     st.markdown("#### 📥 Phase 1a Downloads")
 
-    # Page images ZIP is always available
-    if "phase1a_zip_bytes" in st.session_state:
-        st.download_button(
-            "⬇ Page images ZIP (for offline OCR)",
-            data=st.session_state["phase1a_zip_bytes"],
-            file_name=st.session_state["phase1a_zip_name"],
-            mime="application/zip",
-            use_container_width=True,
-            help=(
-                "Header/footer-stripped page images at the chosen DPI. "
-                "Use these with any external OCR tool, then upload the result "
-                "to Phase 1b via 'Upload User Corrected'."
-            ),
-        )
+    # ── Page images ZIP(s) ───────────────────────────────────────────────── #
+    zip_parts = st.session_state.get("phase1a_zip_parts", [])
+    if zip_parts:
+        if len(zip_parts) == 1:
+            st.download_button(
+                "⬇ Page images ZIP (main text body)",
+                data=zip_parts[0]["bytes"],
+                file_name=zip_parts[0]["name"],
+                mime="application/zip",
+                use_container_width=True,
+                help="Header/footer-stripped page images. Use with any external OCR tool.",
+            )
+        else:
+            st.markdown(f"**Page images ZIP — {len(zip_parts)} parts** (select one to download):")
+            _sel = st.selectbox(
+                "Select part:",
+                range(len(zip_parts)),
+                format_func=lambda i: (
+                    f"{zip_parts[i]['name']}  "
+                    f"({len(zip_parts[i]['bytes']) / 1_048_576:.0f} MB)"
+                ),
+                key="p1a_zip_sel",
+            )
+            st.download_button(
+                f"⬇ {zip_parts[_sel]['name']}",
+                data=zip_parts[_sel]["bytes"],
+                file_name=zip_parts[_sel]["name"],
+                mime="application/zip",
+                use_container_width=True,
+                key="p1a_zip_dl",
+            )
 
-    # If no OCR was run in-app, guide the user to Phase 1b upload path
-    if meta_a.get("ocr_backend") == "none":
+    # ── Footer outputs ───────────────────────────────────────────────────── #
+    if "phase1a_footers_pdf" in st.session_state or "phase1a_footers_zip" in st.session_state:
+        n_foot = meta_a.get("n_footer_pages", 0)
+        st.markdown(f"**Footnote regions** — {n_foot} page(s) with footnotes detected:")
+        fc1, fc2 = st.columns(2)
+        if "phase1a_footers_pdf" in st.session_state:
+            fd = st.session_state["phase1a_footers_pdf"]
+            fc1.download_button(
+                "⬇ Footers PDF", data=fd["bytes"], file_name=fd["name"],
+                mime="application/pdf", use_container_width=True,
+                help="All footnote strips assembled into a labeled PDF, one per page.",
+            )
+        if "phase1a_footers_zip" in st.session_state:
+            fz = st.session_state["phase1a_footers_zip"]
+            fc2.download_button(
+                "⬇ Footer images ZIP", data=fz["bytes"], file_name=fz["name"],
+                mime="application/zip", use_container_width=True,
+                help="Individual footer PNG images at export DPI.",
+            )
+    elif meta_a.get("mode") == "single_book" and meta_a.get("asked_footers"):
+        st.info("No footnote regions were detected in this document.")
+
+    # ── Photo output ─────────────────────────────────────────────────────── #
+    if "phase1a_photos_zip" in st.session_state:
+        n_ph = meta_a.get("n_photos", 0)
+        pz = st.session_state["phase1a_photos_zip"]
+        st.download_button(
+            f"⬇ Photographs ZIP ({n_ph} image{'s' if n_ph != 1 else ''})",
+            data=pz["bytes"], file_name=pz["name"],
+            mime="application/zip", use_container_width=True,
+            help="Extracted photographic regions and their captions as individual PNGs.",
+        )
+    elif meta_a.get("mode") == "single_book" and meta_a.get("asked_photos"):
+        st.info("No photographs were detected in this document.")
+
+    # ── OCR text outputs ─────────────────────────────────────────────────── #
+    if meta_a.get("ocr_backend") == "none" or meta_a.get("mode") == "raw_export":
         st.info(
             "Page images exported. Download the ZIP, run OCR externally (e.g. with "
             "Kraken, Google Vision, or any other tool), then upload the resulting "

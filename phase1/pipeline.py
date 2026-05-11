@@ -2,17 +2,29 @@
 Phase 1 — Pipeline
 Split into two independently runnable stages:
 
-  Phase1aPipeline  — Steps 1–3: Strip margins → Export page images → OCR (Kraken)
+  Phase1aPipeline  — PDF preprocessing: strip margins → export images → OCR
+    Four modes (matching OCR-me):
+      "single_book"  Strip headers/footers → export clean page images → ZIP
+                     + optional footer images (PDF + ZIP)
+                     + optional photograph extraction (ZIP)
+                     + optional Kraken OCR
+      "raw_export"   Export original pages (no stripping) → ZIP
+      "batch"        Alias for single_book; caller iterates over PDFs
+      "visual"       Streamlit-only per-page wizard; pipeline unchanged
+
     Saves:
-      *_phase1a_pages.zip       Clean page images (header/footer stripped) for offline OCR
-      *_phase1a_corrected.txt   Raw Kraken OCR text, per page
-      *_phase1a_normalized.txt  After Arabic normalisation, per page (human-readable)
-      *_phase1a.json            Structured page data consumed by Phase 1b
+      *_phase1a_pages.zip            Clean (or raw) page images for offline OCR
+      *_phase1a_footers.pdf          Assembled footer regions, one per page (optional)
+      *_phase1a_footers_imgs.zip     Footer images, one PNG per page (optional)
+      *_phase1a_photos.zip           Extracted photographs + captions (optional)
+      *_phase1a_corrected.txt        Raw Kraken OCR text, per page
+      *_phase1a_normalized.txt       After Arabic normalisation, per page
+      *_phase1a.json                 Structured page data consumed by Phase 1b
 
-    When ocr_backend="none": only the ZIP is produced; text files are empty stubs
-    so the user can run OCR externally and upload text to Phase 1b.
+    When ocr_backend="none": only the ZIPs are produced; text files are empty
+    stubs so the user can run OCR externally and upload text to Phase 1b.
 
-  Phase1bPipeline  — Steps 4–6: Chunk → Write outputs → Summarise
+  Phase1bPipeline  — Steps 4-6: Chunk → Write outputs → Summarise
     Accepts:  Phase1aResult (in-memory)  OR  path to *_phase1a.json
 
   Phase1Pipeline   — Combined 1a + 1b in a single call (backward-compatible).
@@ -46,12 +58,27 @@ _PAGE_SEP = "\n" + "═" * 60 + "\n"
 @dataclass
 class Phase1Config:
     # ── Phase 1a: PDF preprocessing ──────────────────────────────────────── #
+
+    # Processing mode — matches OCR-me's four modes.
+    # "single_book"  strip margins + export + optional footers/photos + OCR
+    # "raw_export"   export original pages (no stripping), no OCR
+    # "batch"        same as single_book (caller iterates over multiple PDFs)
+    # "visual"       Streamlit per-page wizard; pipeline skips visual-only steps
+    mode: str = "single_book"
+
     # Strip running headers/footers before exporting page images.
     strip_margins: bool = True
     # DPI used for header/footer margin detection (lower = faster).
     hf_dpi: int = 300
     # DPI for page image export (higher = better OCR quality).
     export_dpi: int = 400
+
+    # Extract footnote regions into a labeled PDF and image ZIP.
+    include_footers: bool = True
+    # Extract photographic regions (and captions) into a ZIP.
+    include_photos: bool = False
+    # Split page images ZIP into parts no larger than this (MB). 0 = no split.
+    zip_split_mb: float = 250.0
 
     # OCR backend for in-app recognition.
     # "kraken"  — offline Kraken model (Arabic, best quality on Streamlit Cloud)
@@ -106,10 +133,22 @@ class Phase1aResult:
     corrected_txt_path:   Path
     normalized_txt_path:  Path
     normalized_json_path: Path
-    # ZIP of clean page images — download for offline OCR
-    pages_zip_path:       Optional[Path] = None
+    # Page images ZIP (one or more parts when zip_split_mb is active)
+    pages_zip_paths:      list[Path] = field(default_factory=list)
+    # Footer outputs (optional — only when include_footers=True and footers found)
+    footers_pdf_path:     Optional[Path] = None
+    footers_zip_path:     Optional[Path] = None
+    n_footer_pages:       int = 0
+    # Photo outputs (optional — only when include_photos=True and photos found)
+    photos_zip_path:      Optional[Path] = None
+    n_photos:             int = 0
     elapsed_sec:          float = 0.0
     warnings:             list[str] = field(default_factory=list)
+
+    # Backward-compat: single-zip callers can still access .pages_zip_path
+    @property
+    def pages_zip_path(self) -> Optional[Path]:
+        return self.pages_zip_paths[0] if self.pages_zip_paths else None
 
 
 @dataclass
@@ -130,19 +169,28 @@ class Phase1Result:
 
 
 # ──────────────────────────────────────────────────────────────────────────── #
-#  Phase 1a — Strip margins → Export images → Kraken OCR → Normalise           #
+#  Phase 1a — Strip margins → Export images → OCR → Normalise                  #
 # ──────────────────────────────────────────────────────────────────────────── #
 
 class Phase1aPipeline:
     """
-    Replacement Phase 1a pipeline using the successfully tested OCR-me / Upgrade
-    approach: header/footer stripping → page image export → Kraken OCR.
+    Phase 1a pipeline implementing all four OCR-me modes:
+
+      single_book  Strip headers/footers → export page images → extract
+                   footers (optional) → extract photos (optional) → Kraken OCR
+      raw_export   Export original pages (no stripping), no OCR
+      batch        Same as single_book; caller iterates over multiple PDFs
+      visual       Streamlit per-page wizard; pipeline produces same outputs
+                   as single_book (visual crop control is a UI concern)
 
     Outputs:
-      *_phase1a_pages.zip       ZIP of clean page images for offline OCR
-      *_phase1a_corrected.txt   Raw Kraken OCR text (or empty if ocr_backend=none)
-      *_phase1a_normalized.txt  Text after Arabic normalisation
-      *_phase1a.json            Structured page data consumed by Phase1bPipeline
+      *_phase1a_pages[_part_NNN].zip   Page images (may be split into parts)
+      *_phase1a_footers.pdf            Footer regions assembled into a PDF
+      *_phase1a_footers_imgs.zip       Footer images, one PNG per page
+      *_phase1a_photos.zip             Extracted photographs + captions
+      *_phase1a_corrected.txt          Raw Kraken OCR text
+      *_phase1a_normalized.txt         Text after Arabic normalisation
+      *_phase1a.json                   Structured data consumed by Phase1bPipeline
     """
 
     def __init__(
@@ -161,9 +209,11 @@ class Phase1aPipeline:
         out_dir   = Path(self.cfg.output_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
 
-        # ── Step 1: Strip headers/footers ────────────────────────────────── #
+        raw_export = self.cfg.mode == "raw_export"
+
+        # ── Step 1: Strip headers/footers (skipped for raw_export) ────────── #
         self._progress("Detecting and stripping page margins …", 0.05)
-        if self.cfg.strip_margins:
+        if self.cfg.strip_margins and not raw_export:
             try:
                 from .core.header_footer import strip_pdf, Params as HFParams
                 stripped_path = out_dir / f"{stem}_stripped.pdf"
@@ -195,23 +245,94 @@ class Phase1aPipeline:
             img_paths   = []
             total_pages = 0
 
-        # ── Step 3: Bundle images into ZIP ───────────────────────────────── #
+        # ── Step 3: Bundle images into ZIP (with optional split) ──────────── #
         self._progress("Creating page images ZIP …", 0.25)
-        zip_path: Optional[Path] = None
+        pages_zip_paths: list[Path] = []
         if img_paths:
-            zip_path = out_dir / f"{stem}_phase1a_pages.zip"
-            with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
-                for p in img_paths:
-                    zf.write(p, arcname=p.name)
-            logger.info("Page images ZIP → %s", zip_path)
+            pages_zip_paths = _bundle_to_zips(
+                img_paths, out_dir, stem, self.cfg.zip_split_mb
+            )
+            logger.info(
+                "Page images → %d ZIP part(s): %s",
+                len(pages_zip_paths), [p.name for p in pages_zip_paths],
+            )
         else:
             warnings.append("No page images produced — ZIP not created.")
 
-        # ── Step 4: OCR (Kraken, in-app) ─────────────────────────────────── #
+        # ── Step 4: Extract footers (Single Book / Visual mode only) ─────── #
+        footers_pdf_path: Optional[Path] = None
+        footers_zip_path: Optional[Path] = None
+        n_footer_pages   = 0
+
+        if self.cfg.include_footers and not raw_export and img_paths:
+            self._progress("Extracting footnote regions …", 0.30)
+            try:
+                from .core.page_export import extract_footers_pdf
+                from .core.header_footer import Params as HFParams
+                foot_pdf  = out_dir / f"{stem}_phase1a_footers.pdf"
+                foot_dir  = out_dir / f"{stem}_footer_imgs"
+                foot_zip  = out_dir / f"{stem}_phase1a_footers_imgs.zip"
+                hf_params = HFParams(dpi=self.cfg.hf_dpi)
+                foot_pages = extract_footers_pdf(
+                    pdf_path, foot_pdf,
+                    p=hf_params,
+                    img_dir=str(foot_dir),
+                    images_dpi=self.cfg.export_dpi,
+                    zip_path=str(foot_zip),
+                )
+                n_footer_pages = len(foot_pages)
+                if n_footer_pages:
+                    if foot_pdf.exists():
+                        footers_pdf_path = foot_pdf
+                    if foot_zip.exists():
+                        footers_zip_path = foot_zip
+                    logger.info(
+                        "Footers extracted from %d page(s) → %s / %s",
+                        n_footer_pages, foot_pdf.name, foot_zip.name,
+                    )
+                else:
+                    warnings.append("No footnote regions detected in this document.")
+                    logger.info("No footnote regions found.")
+            except Exception as exc:
+                warnings.append(f"Footer extraction failed: {exc}")
+                logger.exception("Footer extraction failed")
+
+        # ── Step 5: Extract photographs (optional) ────────────────────────── #
+        photos_zip_path: Optional[Path] = None
+        n_photos         = 0
+
+        if self.cfg.include_photos and not raw_export and img_paths:
+            self._progress("Extracting photographs …", 0.40)
+            try:
+                from .core.image_extract import extract_images
+                photo_dir = out_dir / f"{stem}_photos"
+                photo_zip = out_dir / f"{stem}_phase1a_photos.zip"
+                photo_results = extract_images(
+                    pdf_path, str(photo_dir),
+                    dpi=self.cfg.export_dpi,
+                    with_captions=True,
+                    use_body_crop=True,
+                    zip_path=str(photo_zip),
+                )
+                n_photos = sum(len(r.photos) for r in photo_results)
+                if n_photos and photo_zip.exists():
+                    photos_zip_path = photo_zip
+                    logger.info(
+                        "Photographs extracted: %d image(s) → %s",
+                        n_photos, photo_zip.name,
+                    )
+                else:
+                    warnings.append("No photographs detected in this document.")
+                    logger.info("No photographs found.")
+            except Exception as exc:
+                warnings.append(f"Photograph extraction failed: {exc}")
+                logger.exception("Photograph extraction failed")
+
+        # ── Step 6: OCR (Kraken, in-app) — skip for raw_export ───────────── #
         pages_data: list[dict] = []
 
-        if self.cfg.ocr_backend == "kraken" and img_paths:
-            self._progress("Loading Kraken OCR model …", 0.30)
+        if self.cfg.ocr_backend == "kraken" and img_paths and not raw_export:
+            self._progress("Loading Kraken OCR model …", 0.45)
             try:
                 from .core.kraken_engine import (
                     load_model, binarize_page, ocr_page, KrakenNotAvailableError,
@@ -219,7 +340,7 @@ class Phase1aPipeline:
                 from PIL import Image as PILImage
                 model = load_model()
                 for i, img_path in enumerate(img_paths):
-                    pct = 0.30 + 0.55 * (i / total_pages)
+                    pct = 0.45 + 0.40 * (i / total_pages)
                     self._progress(
                         f"Kraken OCR — page {i + 1}/{total_pages} …", pct
                     )
@@ -250,15 +371,14 @@ class Phase1aPipeline:
                 pages_data = _empty_pages(total_pages)
 
         else:
-            # No in-app OCR — empty stubs so Phase 1b JSON is valid.
             pages_data = _empty_pages(total_pages)
-            if self.cfg.ocr_backend not in ("none", "kraken"):
+            if self.cfg.ocr_backend not in ("none", "kraken") and not raw_export:
                 warnings.append(
                     f"Unknown OCR backend '{self.cfg.ocr_backend}' — "
                     "no OCR performed."
                 )
 
-        # ── Step 5: Normalise text ────────────────────────────────────────── #
+        # ── Step 7: Normalise text ────────────────────────────────────────── #
         has_text = any(d["raw_text"].strip() for d in pages_data)
         if has_text:
             self._progress("Normalising Arabic text …", 0.87)
@@ -287,7 +407,7 @@ class Phase1aPipeline:
                 warnings.append(f"Arabic normalisation failed: {exc}")
                 logger.exception("Arabic normalisation failed")
 
-        # ── Step 6: Save output files ─────────────────────────────────────── #
+        # ── Step 8: Save output files ─────────────────────────────────────── #
         self._progress("Saving output files …", 0.92)
 
         corrected_txt_path   = out_dir / f"{stem}_phase1a_corrected.txt"
@@ -301,8 +421,8 @@ class Phase1aPipeline:
             {"title": stem}, pages_data, normalized_json_path,
         )
         logger.info(
-            "Phase 1a output → zip: %s | corrected: %s | normalized: %s | json: %s",
-            zip_path, corrected_txt_path, normalized_txt_path, normalized_json_path,
+            "Phase 1a output → zips: %s | footers: %s | photos: %s",
+            [p.name for p in pages_zip_paths], footers_pdf_path, photos_zip_path,
         )
 
         elapsed = time.perf_counter() - t0
@@ -318,7 +438,12 @@ class Phase1aPipeline:
             corrected_txt_path   = corrected_txt_path,
             normalized_txt_path  = normalized_txt_path,
             normalized_json_path = normalized_json_path,
-            pages_zip_path       = zip_path,
+            pages_zip_paths      = pages_zip_paths,
+            footers_pdf_path     = footers_pdf_path,
+            footers_zip_path     = footers_zip_path,
+            n_footer_pages       = n_footer_pages,
+            photos_zip_path      = photos_zip_path,
+            n_photos             = n_photos,
             elapsed_sec          = elapsed,
             warnings             = warnings,
         )
@@ -461,6 +586,47 @@ class Phase1Pipeline:
 #  Module-level helpers                                                         #
 # ──────────────────────────────────────────────────────────────────────────── #
 
+def _bundle_to_zips(
+    img_paths: list[Path],
+    out_dir: Path,
+    stem: str,
+    split_mb: float,
+) -> list[Path]:
+    """Bundle a list of image files into one or more ZIPs.
+
+    When split_mb > 0 the output is split so no part exceeds split_mb MB.
+    Single-part output: ``{stem}_phase1a_pages.zip``.
+    Multi-part output:  ``{stem}_phase1a_pages_part_001.zip``, …
+    """
+    max_bytes = int(split_mb * 1024 * 1024) if split_mb > 0 else 0
+
+    parts: list[list[Path]] = [[]]
+    cur_size = 0
+    for p in img_paths:
+        size = p.stat().st_size
+        if max_bytes and cur_size and cur_size + size > max_bytes:
+            parts.append([])
+            cur_size = 0
+        parts[-1].append(p)
+        cur_size += size
+
+    zip_paths: list[Path] = []
+    multi = len(parts) > 1
+    for j, part in enumerate(parts, 1):
+        if not part:
+            continue
+        name = (
+            f"{stem}_phase1a_pages_part_{j:03d}.zip" if multi
+            else f"{stem}_phase1a_pages.zip"
+        )
+        zp = out_dir / name
+        with zipfile.ZipFile(zp, "w", zipfile.ZIP_DEFLATED) as zf:
+            for p in part:
+                zf.write(p, arcname=p.name)
+        zip_paths.append(zp)
+    return zip_paths
+
+
 def _empty_pages(total: int) -> list[dict]:
     return [
         {"page_number": i + 1, "pdf_type": "scanned", "raw_text": "", "raw_text_pre": ""}
@@ -525,7 +691,7 @@ def _load_phase1a_json(json_path: Path) -> Phase1aResult:
         corrected_txt_path   = out_dir / f"{stem}_phase1a_corrected.txt",
         normalized_txt_path  = out_dir / f"{stem}_phase1a_normalized.txt",
         normalized_json_path = json_path,
-        pages_zip_path       = None,
+        pages_zip_paths      = [],
     )
 
 
