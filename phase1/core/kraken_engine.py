@@ -188,13 +188,16 @@ def ocr_page(
     _bidi_kwarg = (
         "bidi_reordering" if "bidi_reordering" in _rpred_params else "bidi_reorder"
     )
+    _extra = {}
+    if "autocast" in _rpred_params:
+        _extra["autocast"] = autocast
     predictions = rpred.rpred(
         model,
         img_rgb,
         seg,
         **{_bidi_kwarg: bidi},
         pad=pad,
-        autocast=autocast,
+        **_extra,
     )
 
     lines: list[str] = []
