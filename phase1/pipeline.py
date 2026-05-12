@@ -335,7 +335,7 @@ class Phase1aPipeline:
             self._progress("Loading Kraken OCR model …", 0.45)
             try:
                 from .core.kraken_engine import (
-                    load_model, binarize_page, ocr_page, KrakenNotAvailableError,
+                    load_model, ocr_page, KrakenNotAvailableError,
                 )
                 from PIL import Image as PILImage
                 model = load_model()
@@ -345,9 +345,9 @@ class Phase1aPipeline:
                         f"Kraken OCR — page {i + 1}/{total_pages} …", pct
                     )
                     img     = PILImage.open(img_path)
-                    bw_img  = binarize_page(img, threshold=self.cfg.kraken_threshold)
                     text, _ = ocr_page(
-                        model, bw_img,
+                        model, img,
+                        threshold          = self.cfg.kraken_threshold,
                         text_direction     = self.cfg.kraken_text_direction,
                         autocast           = self.cfg.kraken_autocast,
                         pad                = self.cfg.kraken_pad,
