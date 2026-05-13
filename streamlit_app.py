@@ -355,6 +355,22 @@ with st.sidebar:
     )
 
     st.markdown("---")
+    with st.expander("🔬 Diagnostics", expanded=False):
+        try:
+            from PIL.features import check as _pil_check
+            _raqm = _pil_check("raqm")
+        except Exception as _e:
+            _raqm = f"error: {_e}"
+        st.markdown(
+            f"**libraqm** (Arabic shaping in Pillow): "
+            f"{'✅ available' if _raqm is True else ('❌ not available' if _raqm is False else _raqm)}"
+        )
+        try:
+            import PIL
+            st.markdown(f"**Pillow** version: `{PIL.__version__}`")
+        except Exception:
+            pass
+
     st.markdown(
         "<span style='font-family:DM Mono,monospace;font-size:0.6rem;"
         "color:#6b6355;letter-spacing:.1em'>ARABIC BOOK BRIEF ENGINE v1.0</span>",
