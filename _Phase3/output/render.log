@@ -1,0 +1,368 @@
+Amiri not found on system — downloading from upstream
+
+Plan   : output/al_askari_plan_v2.json  (51 shots)
+Audio  : output/al_askari_audio.mp3
+Output : output/final_cut.mp4
+Config : 1920×1080 @ 25 fps  captions=on
+Vision : on  Cache: on  User dir: –  Book extracts: –
+
+INFO  phase3.render  [render 6%] shot 1/51: title_card
+  [█░░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   6%  shot 1/51: title_card                                                 INFO  phase3.render  [render 8%] shot 2/51: typography
+  [██░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   7%  shot 2/51: typography                                                 INFO  phase3.render  [render 9%] shot 3/51: typography
+  [██░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   9%  shot 3/51: typography                                                 INFO  phase3.sources.loc  LoC: 0 candidates for 'Jafar al-Askari Iraqi general historical portrait'
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'Jafar al-Askari Iraqi general historical portrait'
+INFO  phase3.sources.internet_archive  Internet Archive: 0 candidates for 'Jafar al-Askari Iraqi general historical portrait'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'Jafar al-Askari Iraqi general historical portrait'
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+INFO  phase3.sources.vision  Vision 1/2/2  A stylish businessman with a briefcase e  — Modern staged photograph of a man in formal attire boarding 
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+INFO  phase3.sources.vision  Vision 1/2/2  A father and child sitting with a falcon  — Period-appropriate costume and desert setting evoke early 20
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+INFO  phase3.sources.vision  Vision 1/2/2  Elderly man with gray hair and mustache   — Portrait of an elderly man with appropriate era styling and 
+INFO  phase3.sources  Shot 4: best=A stylish businessman with a briefcase exits a pla (score 5)
+INFO  phase3.render  Shot 4: using fetched image from pexels
+INFO  phase3.render  [render 10%] shot 4/51: portrait
+  [███░░░░░░░░░░░░░░░░░░░░░░░░░░░]  10%  shot 4/51: portrait                                                   INFO  phase3.sources.loc  LoC: 0 candidates for 'Ottoman Empire collapse 1918 historical photograph'
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'Ottoman Empire collapse 1918 historical photograph'
+INFO  phase3.sources.internet_archive  Internet Archive: 0 candidates for 'Ottoman Empire collapse 1918 historical photograph'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'Ottoman Empire collapse 1918 historical photograph'
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Stunning architectural view of Hagia Sop: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cSyFPHr1K62dpseuVi'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Elegant view of the Suleymaniye Mosque c: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cT1Eh3frfwQxtyNYvn'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Stunning aerial view of Topkapi Palace, : Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cT393T5kaogZ85cRNb'} — keeping with neutral score
+INFO  phase3.sources  Shot 5: best=Stunning architectural view of Hagia Sophia, showc (score 5)
+INFO  phase3.render  Shot 5: using fetched image from pexels
+INFO  phase3.render  [render 12%] shot 5/51: archive
+  [███░░░░░░░░░░░░░░░░░░░░░░░░░░░]  11%  shot 5/51: archive                                                    INFO  phase3.render  [render 13%] shot 6/51: typography
+  [███░░░░░░░░░░░░░░░░░░░░░░░░░░░]  13%  shot 6/51: typography                                                 INFO  phase3.sources.loc  LoC: 0 candidates for 'Jafar al-Askari Ottoman military officer uniform historical'
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'Jafar al-Askari Ottoman military officer uniform historical'
+INFO  phase3.sources.internet_archive  Internet Archive: 0 candidates for 'Jafar al-Askari Ottoman military officer uniform historical'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'Jafar al-Askari Ottoman military officer uniform historical'
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Man in a detailed historical officer uni: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cUyQ7i7aaTbTov7xHF'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Portrait of a man in a historical milita: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cUzqgpF8L2F6FhbdSo'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on An Argentinian guard in formal attire po: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cV2HkJwtpqEuk6ikRf'} — keeping with neutral score
+INFO  phase3.sources  Shot 7: best=Man in a detailed historical officer uniform stand (score 5)
+INFO  phase3.render  Shot 7: using fetched image from pexels
+INFO  phase3.render  [render 15%] shot 7/51: portrait
+  [████░░░░░░░░░░░░░░░░░░░░░░░░░░]  14%  shot 7/51: portrait                                                   INFO  phase3.render  [render 16%] shot 8/51: typography
+  [████░░░░░░░░░░░░░░░░░░░░░░░░░░]  15%  shot 8/51: typography                                                 INFO  phase3.render  [render 17%] shot 9/51: section_mark
+  [█████░░░░░░░░░░░░░░░░░░░░░░░░░]  17%  shot 9/51: section_mark                                               WARNING  phase3.sources.loc  LoC search failed for 'Mosul Iraq 1904 historical cityscape Ottoman era': The read operation timed out
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'Mosul Iraq 1904 historical cityscape Ottoman era'
+INFO  phase3.sources.internet_archive  Internet Archive: 0 candidates for 'Mosul Iraq 1904 historical cityscape Ottoman era'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'Mosul Iraq 1904 historical cityscape Ottoman era'
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Breathtaking aerial view of Baghdad city: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cZa7ndvX99sECupQPM'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Explore the historic ruins of ancient Ba: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cZc28k3fyn4UVbZbrs'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Explore an ancient Ottoman cemetery with: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cZduVkfYDRndH8Xoqu'} — keeping with neutral score
+INFO  phase3.sources  Shot 10: best=Breathtaking aerial view of Baghdad cityscape with (score 5)
+INFO  phase3.render  Shot 10: using fetched image from pexels
+INFO  phase3.render  [render 19%] shot 10/51: location
+  [█████░░░░░░░░░░░░░░░░░░░░░░░░░]  18%  shot 10/51: location                                                  WARNING  phase3.sources.loc  LoC search failed for 'Istanbul Constantinople train station 1900s Ottoman travel': The read operation timed out
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'Istanbul Constantinople train station 1900s Ottoman travel'
+INFO  phase3.sources.internet_archive  Internet Archive: 0 candidates for 'Istanbul Constantinople train station 1900s Ottoman travel'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'Istanbul Constantinople train station 1900s Ottoman travel'
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Sunlit view of the historic Sirkeci Trai: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cbgZHsenFx9ZrA6j6s'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Vibrant daytime view of a tram at Sirkec: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cbi1rE5x1jPGStzcpb'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Explore the charming architecture of a h: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cbjYP2u6A93PsMVMvV'} — keeping with neutral score
+INFO  phase3.sources  Shot 11: best=Sunlit view of the historic Sirkeci Train Station  (score 5)
+INFO  phase3.render  Shot 11: using fetched image from pexels
+INFO  phase3.render  [render 20%] shot 11/51: broll
+  [██████░░░░░░░░░░░░░░░░░░░░░░░░]  20%  shot 11/51: broll                                                     INFO  phase3.sources.loc  LoC: 0 candidates for 'Ottoman Military Academy Istanbul Harbiye 1900s'
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'Ottoman Military Academy Istanbul Harbiye 1900s'
+INFO  phase3.sources.internet_archive  Internet Archive: 0 candidates for 'Ottoman Military Academy Istanbul Harbiye 1900s'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'Ottoman Military Academy Istanbul Harbiye 1900s'
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Historic Kuleli Military School on the B: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cccR2vSyZkNmWY2Ah7'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Close-up of bronze Ottoman soldier statu: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cce5jsxPRuTkjyK7mR'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Stunning view of Kuleli Military High Sc: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5ccfa3CbSwSz7CtSv6u'} — keeping with neutral score
+INFO  phase3.sources  Shot 12: best=Historic Kuleli Military School on the Bosphorus i (score 5)
+INFO  phase3.render  Shot 12: using fetched image from pexels
+INFO  phase3.render  [render 21%] shot 12/51: location
+  [██████░░░░░░░░░░░░░░░░░░░░░░░░]  21%  shot 12/51: location                                                  INFO  phase3.render  [render 23%] shot 13/51: typography
+  [██████░░░░░░░░░░░░░░░░░░░░░░░░]  22%  shot 13/51: typography                                                INFO  phase3.sources.loc  LoC: 0 candidates for 'Ottoman young officers military cadets 1900s group photograph'
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'Ottoman young officers military cadets 1900s group photograph'
+INFO  phase3.sources.internet_archive  Internet Archive: 0 candidates for 'Ottoman young officers military cadets 1900s group photograph'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'Ottoman young officers military cadets 1900s group photograph'
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on A group of men in military-style uniform: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5ceUmxNRUeZoT5t6qxS'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on A Russian officer in uniform pinning a b: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5ceWabrfxNnqHX9NtoD'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on A military officer oversees a formation : Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5ceYWSEq3icnfCiPR8r'} — keeping with neutral score
+INFO  phase3.sources  Shot 14: best=A group of men in military-style uniforms sitting  (score 5)
+INFO  phase3.render  Shot 14: using fetched image from pexels
+INFO  phase3.render  [render 24%] shot 14/51: archive
+  [███████░░░░░░░░░░░░░░░░░░░░░░░]  24%  shot 14/51: archive                                                   WARNING  phase3.sources.loc  LoC search failed for 'Ottoman Empire Arab officers Syria Egypt Iraq 1900s': The read operation timed out
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'Ottoman Empire Arab officers Syria Egypt Iraq 1900s'
+INFO  phase3.sources.internet_archive  Internet Archive: 0 candidates for 'Ottoman Empire Arab officers Syria Egypt Iraq 1900s'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'Ottoman Empire Arab officers Syria Egypt Iraq 1900s'
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Explore a vintage shop in Old Damascus w: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cgn5p56bK94A1q6BcJ'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Lively street in Alexandria, Egypt with : Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cgoxRh87FN3vzgZf1A'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Close-up of a colorful map depicting cou: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cgqUD7EyG9Mx55Fcef'} — keeping with neutral score
+INFO  phase3.sources  Shot 15: best=Explore a vintage shop in Old Damascus with ivy-co (score 5)
+INFO  phase3.render  Shot 15: using fetched image from pexels
+INFO  phase3.render  [render 26%] shot 15/51: broll
+  [███████░░░░░░░░░░░░░░░░░░░░░░░]  25%  shot 15/51: broll                                                     INFO  phase3.sources.loc  LoC: 0 candidates for 'Mahmud Shevket Pasha Ottoman general portrait historical'
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'Mahmud Shevket Pasha Ottoman general portrait historical'
+INFO  phase3.sources.internet_archive  Internet Archive: 0 candidates for 'Mahmud Shevket Pasha Ottoman general portrait historical'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'Mahmud Shevket Pasha Ottoman general portrait historical'
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Close-up of bronze Ottoman soldier statu: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5chijvbnvS3HKF8B3K3'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on View of the detailed dome and Arabic cal: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5chkFTcnxtgL17E9FH4'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Majestic statue of Atatürk on horseback : Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5chmfHtE9Wve6KeCHmr'} — keeping with neutral score
+INFO  phase3.sources  Shot 16: best=Close-up of bronze Ottoman soldier statues in Ista (score 5)
+INFO  phase3.render  Shot 16: using fetched image from pexels
+INFO  phase3.render  [render 27%] shot 16/51: portrait
+  [████████░░░░░░░░░░░░░░░░░░░░░░]  26%  shot 16/51: portrait                                                  INFO  phase3.render  [render 28%] shot 17/51: typography
+  [████████░░░░░░░░░░░░░░░░░░░░░░]  28%  shot 17/51: typography                                                INFO  phase3.sources.loc  LoC: 0 candidates for 'Ottoman Empire reform modernization military drill 1908'
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'Ottoman Empire reform modernization military drill 1908'
+INFO  phase3.sources.internet_archive  Internet Archive: 0 candidates for 'Ottoman Empire reform modernization military drill 1908'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'Ottoman Empire reform modernization military drill 1908'
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Ceremonial soldiers perform the changing: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5ckranqf6aDJDkbAbKy'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Formal marching ceremony with soldiers a: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cktSAi6r3U62xLaW9f'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Turkish warrior in armor riding a horse,: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5ckvFJpbATWYhrktQTG'} — keeping with neutral score
+INFO  phase3.sources  Shot 18: best=Ceremonial soldiers perform the changing of the gu (score 5)
+INFO  phase3.render  Shot 18: using fetched image from pexels
+INFO  phase3.render  [render 30%] shot 18/51: archive
+  [████████░░░░░░░░░░░░░░░░░░░░░░]  29%  shot 18/51: archive                                                   INFO  phase3.render  [render 31%] shot 19/51: typography
+  [█████████░░░░░░░░░░░░░░░░░░░░░]  31%  shot 19/51: typography                                                INFO  phase3.sources.loc  LoC: 0 candidates for 'Arab world intellectuals reform movement early 20th century'
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'Arab world intellectuals reform movement early 20th century'
+INFO  phase3.sources.internet_archive  Internet Archive: 0 candidates for 'Arab world intellectuals reform movement early 20th century'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'Arab world intellectuals reform movement early 20th century'
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Protesters in Rabat display Palestinian : Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cnvLpQi72d8HLdPZiX'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on A stack of Islamic religious books on a : Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cnxfU1uYsfHLTcQN6M'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Black and white scene of protesters and : Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cnzXqMS9hqCkz8jEwy'} — keeping with neutral score
+INFO  phase3.sources  Shot 20: best=Protesters in Rabat display Palestinian flags duri (score 5)
+INFO  phase3.render  Shot 20: using fetched image from pexels
+INFO  phase3.render  [render 32%] shot 20/51: broll
+  [█████████░░░░░░░░░░░░░░░░░░░░░]  32%  shot 20/51: broll                                                     INFO  phase3.render  [render 34%] shot 21/51: section_mark
+  [██████████░░░░░░░░░░░░░░░░░░░░]  33%  shot 21/51: section_mark                                              INFO  phase3.sources.loc  LoC: 0 candidates for 'Committee Union Progress CUP secret meeting Ottoman 1907'
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'Committee Union Progress CUP secret meeting Ottoman 1907'
+INFO  phase3.sources.internet_archive  Internet Archive: 0 candidates for 'Committee Union Progress CUP secret meeting Ottoman 1907'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'Committee Union Progress CUP secret meeting Ottoman 1907'
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Men in dark attire with balaclavas gathe: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cpt5hG14i4UXsH9vwd'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Warm cafe ambiance with Turkish tea and : Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cpuVn2n93xancS3XKe'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Close-up of people holding a coffee cup : Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cpvvqyaoiNd2bpL8gt'} — keeping with neutral score
+INFO  phase3.sources  Shot 22: best=Men in dark attire with balaclavas gather around a (score 5)
+INFO  phase3.render  Shot 22: using fetched image from pexels
+INFO  phase3.render  [render 35%] shot 22/51: archive
+  [██████████░░░░░░░░░░░░░░░░░░░░]  35%  shot 22/51: archive                                                   INFO  phase3.sources.loc  LoC: 0 candidates for 'Young Turk Revolution 1908 Istanbul crowd celebration historical'
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'Young Turk Revolution 1908 Istanbul crowd celebration historical'
+INFO  phase3.sources.internet_archive  Internet Archive: 0 candidates for 'Young Turk Revolution 1908 Istanbul crowd celebration historical'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'Young Turk Revolution 1908 Istanbul crowd celebration historical'
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Massive gathering at Anıtkabir, Ankara, : Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5crC9R73yU2r2jEdhqS'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Silhouette of people on İstiklal Street : Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5crFKuqqBabcfS27W2Z'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Women in traditional attire wave flags f: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5crHDGNKNVmCPY3TkaS'} — keeping with neutral score
+INFO  phase3.sources  Shot 23: best=Massive gathering at Anıtkabir, Ankara, featuring  (score 5)
+INFO  phase3.render  Shot 23: using fetched image from pexels
+INFO  phase3.render  [render 37%] shot 23/51: broll
+  [██████████░░░░░░░░░░░░░░░░░░░░]  36%  shot 23/51: broll                                                     INFO  phase3.sources.loc  LoC: 0 candidates for 'Sultan Abdulhamid II deposed 1909 Ottoman historical photograph'
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'Sultan Abdulhamid II deposed 1909 Ottoman historical photograph'
+INFO  phase3.sources.internet_archive  Internet Archive: 0 candidates for 'Sultan Abdulhamid II deposed 1909 Ottoman historical photograph'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'Sultan Abdulhamid II deposed 1909 Ottoman historical photograph'
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Close-up of bronze Ottoman soldier statu: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5csgYFGFnnaaDM4pFVD'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on A beautifully adorned Ottoman fountain i: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cshzJqZ3u5RmHhxUUz'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on A stunning view of a historic mosque in : Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5csjTcgj1dDdMLGa1kg'} — keeping with neutral score
+INFO  phase3.sources  Shot 24: best=Close-up of bronze Ottoman soldier statues in Ista (score 5)
+INFO  phase3.render  Shot 24: using fetched image from pexels
+INFO  phase3.render  [render 38%] shot 24/51: archive
+  [███████████░░░░░░░░░░░░░░░░░░░]  37%  shot 24/51: archive                                                   INFO  phase3.render  [render 39%] shot 25/51: typography
+  [███████████░░░░░░░░░░░░░░░░░░░]  39%  shot 25/51: typography                                                INFO  phase3.sources.loc  LoC: 0 candidates for 'Jafar al-Askari 1908 Young Turk revolution officer historical'
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'Jafar al-Askari 1908 Young Turk revolution officer historical'
+INFO  phase3.sources.internet_archive  Internet Archive: 0 candidates for 'Jafar al-Askari 1908 Young Turk revolution officer historical'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'Jafar al-Askari 1908 Young Turk revolution officer historical'
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on A young man in a white shirt poses again: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cux2Twb1CdVgWP6D4Z'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on A man in historical attire holding a sab: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cuyYVv4eQaKS4NxnBY'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Stylish young woman poses at İstanbul's : Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cuzypd99nsbRyD5DK1'} — keeping with neutral score
+INFO  phase3.sources  Shot 26: best=A young man in a white shirt poses against an orna (score 5)
+INFO  phase3.render  Shot 26: using fetched image from pexels
+INFO  phase3.render  [render 41%] shot 26/51: portrait
+  [████████████░░░░░░░░░░░░░░░░░░]  40%  shot 26/51: portrait                                                  INFO  phase3.render  [render 42%] shot 27/51: typography
+  [████████████░░░░░░░░░░░░░░░░░░]  42%  shot 27/51: typography                                                INFO  phase3.sources.loc  LoC: 0 candidates for 'Ottoman political intrigue conspiracy 1910s historical illustration'
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'Ottoman political intrigue conspiracy 1910s historical illustration'
+INFO  phase3.sources.internet_archive  Internet Archive: 0 candidates for 'Ottoman political intrigue conspiracy 1910s historical illustration'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'Ottoman political intrigue conspiracy 1910s historical illustration'
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Vibrant map featuring countries in the M: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cxwSKvU7uNmbYUEM3b'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Close-up of a vintage map showing Argent: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cxyDVHnaZEzT777Zmo'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Majestic statue of Atatürk on horseback : Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5cxzcL1TFANv866s64c'} — keeping with neutral score
+INFO  phase3.sources  Shot 28: best=Vibrant map featuring countries in the Middle East (score 5)
+INFO  phase3.render  Shot 28: using fetched image from pexels
+INFO  phase3.render  [render 43%] shot 28/51: broll
+  [█████████████░░░░░░░░░░░░░░░░░]  43%  shot 28/51: broll                                                     INFO  phase3.render  [render 45%] shot 29/51: typography
+  [█████████████░░░░░░░░░░░░░░░░░]  44%  shot 29/51: typography                                                INFO  phase3.render  [render 46%] shot 30/51: typography
+  [█████████████░░░░░░░░░░░░░░░░░]  46%  shot 30/51: typography                                                INFO  phase3.render  [render 48%] shot 31/51: section_mark
+  [██████████████░░░░░░░░░░░░░░░░]  47%  shot 31/51: section_mark                                              INFO  phase3.sources.loc  LoC: 0 candidates for 'Balkan Wars 1912 1913 Ottoman army battlefield historical photograph'
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'Balkan Wars 1912 1913 Ottoman army battlefield historical photograph'
+INFO  phase3.sources.internet_archive  Internet Archive: 0 candidates for 'Balkan Wars 1912 1913 Ottoman army battlefield historical photograph'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'Balkan Wars 1912 1913 Ottoman army battlefield historical photograph'
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Bronze statue and relief honoring Turkis: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5d2xxE7qJZP66wgGdoS'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Group of men reenacting a historical mil: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5d2zVVr5nbagjVnjsAk'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Three soldiers in vintage uniforms reena: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5d31xZ3T2SZtxAT7cRC'} — keeping with neutral score
+INFO  phase3.sources  Shot 32: best=Bronze statue and relief honoring Turkish martyrs  (score 5)
+INFO  phase3.render  Shot 32: using fetched image from pexels
+INFO  phase3.render  [render 49%] shot 32/51: archive
+  [██████████████░░░░░░░░░░░░░░░░]  48%  shot 32/51: archive                                                   INFO  phase3.render  [render 50%] shot 33/51: typography
+  [███████████████░░░░░░░░░░░░░░░]  50%  shot 33/51: typography                                                INFO  phase3.sources.loc  LoC: 0 candidates for 'Arab Revolt 1916 Sharif Hussein Faisal forces historical photograph'
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'Arab Revolt 1916 Sharif Hussein Faisal forces historical photograph'
+INFO  phase3.sources.internet_archive  Internet Archive: 0 candidates for 'Arab Revolt 1916 Sharif Hussein Faisal forces historical photograph'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'Arab Revolt 1916 Sharif Hussein Faisal forces historical photograph'
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Libyan soldiers holding rifles and red f: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5d5KnQjtmLYXB9mhApK'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on A captivating vintage army photo in a se: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5d5MMAiLcGk5VEZrubk'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Antique family photographs with pink ros: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5d5P4cDGbPujpnhfftw'} — keeping with neutral score
+INFO  phase3.sources  Shot 34: best=Libyan soldiers holding rifles and red flares in a (score 5)
+INFO  phase3.render  Shot 34: using fetched image from pexels
+INFO  phase3.render  [render 52%] shot 34/51: archive
+  [███████████████░░░░░░░░░░░░░░░]  51%  shot 34/51: archive                                                   INFO  phase3.sources.loc  LoC: 0 candidates for 'North Africa Libya desert Sanussi movement World War One'
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'North Africa Libya desert Sanussi movement World War One'
+INFO  phase3.sources.internet_archive  Internet Archive: 0 candidates for 'North Africa Libya desert Sanussi movement World War One'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'North Africa Libya desert Sanussi movement World War One'
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on View of the architectural beauty of Ghar: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5d6X3MaSnch5VD2iQLe'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Explore the iconic desert landscape of t: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5d6YuEJBzG5NXYsCKpF'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Camels feed in the arid landscape of Al : Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5d6agtDQfD9ycw28Usj'} — keeping with neutral score
+INFO  phase3.sources  Shot 35: best=View of the architectural beauty of Ghardaïa, famo (score 5)
+INFO  phase3.render  Shot 35: using fetched image from pexels
+INFO  phase3.render  [render 53%] shot 35/51: location
+  [███████████████░░░░░░░░░░░░░░░]  53%  shot 35/51: location                                                  INFO  phase3.render  [render 54%] shot 36/51: typography
+  [████████████████░░░░░░░░░░░░░░]  54%  shot 36/51: typography                                                INFO  phase3.sources.loc  LoC: 0 candidates for 'World War One Middle East Arabian Peninsula desert military operations'
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'World War One Middle East Arabian Peninsula desert military operations'
+INFO  phase3.sources.internet_archive  Internet Archive: 0 candidates for 'World War One Middle East Arabian Peninsula desert military operations'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'World War One Middle East Arabian Peninsula desert military operations'
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Vintage cannon displayed outdoors at a m: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5d8mekEVrYKvTNC73Ut'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on A soldier with tactical gear hiding in t: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5d8oR9ynQbPRjRwLpT3'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Two camels walking through the orange sa: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5d8qBKUJe9mcGZcATDE'} — keeping with neutral score
+INFO  phase3.sources  Shot 37: best=Vintage cannon displayed outdoors at a museum in S (score 5)
+INFO  phase3.render  Shot 37: using fetched image from pexels
+INFO  phase3.render  [render 56%] shot 37/51: archive
+  [████████████████░░░░░░░░░░░░░░]  55%  shot 37/51: archive                                                   INFO  phase3.render  [render 57%] shot 38/51: typography
+  [█████████████████░░░░░░░░░░░░░]  57%  shot 38/51: typography                                                INFO  phase3.sources.loc  LoC: 0 candidates for 'Jafar al-Askari Iraq minister historical photograph 1920s'
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'Jafar al-Askari Iraq minister historical photograph 1920s'
+INFO  phase3.sources.internet_archive  Internet Archive: 0 candidates for 'Jafar al-Askari Iraq minister historical photograph 1920s'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'Jafar al-Askari Iraq minister historical photograph 1920s'
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Caucasian couple in vintage attire sitti: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5dAp7t9vxsmcD9mmRNJ'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Stylish man in 1920s attire posing on st: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5dAqu38z92mi2s2KxhB'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on A stylish couple in vintage attire relax: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5dB2xoFsRN3Z7ZdineN'} — keeping with neutral score
+INFO  phase3.sources  Shot 39: best=Caucasian couple in vintage attire sitting indoors (score 5)
+INFO  phase3.render  Shot 39: using fetched image from pexels
+INFO  phase3.render  [render 59%] shot 39/51: portrait
+  [█████████████████░░░░░░░░░░░░░]  58%  shot 39/51: portrait                                                  INFO  phase3.render  [render 60%] shot 40/51: section_mark
+  [█████████████████░░░░░░░░░░░░░]  59%  shot 40/51: section_mark                                              INFO  phase3.render  [render 61%] shot 41/51: typography
+  [██████████████████░░░░░░░░░░░░]  61%  shot 41/51: typography                                                INFO  phase3.render  [render 63%] shot 42/51: typography
+  [██████████████████░░░░░░░░░░░░]  62%  shot 42/51: typography                                                INFO  phase3.sources.loc  LoC: 0 candidates for 'historical memoir old book manuscript Arabic handwriting'
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'historical memoir old book manuscript Arabic handwriting'
+INFO  phase3.sources.internet_archive  Internet Archive: 0 candidates for 'historical memoir old book manuscript Arabic handwriting'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'historical memoir old book manuscript Arabic handwriting'
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Open ancient manuscript on red backgroun: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5dF3DnjLZACTuUuLggA'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Detailed view of an ancient illuminated : Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5dF4tkGifTkSfHMoW17'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on A detailed view of ancient book pages sh: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5dF6idZ9PaT1sHP8oKc'} — keeping with neutral score
+INFO  phase3.sources  Shot 43: best=Open ancient manuscript on red background displaye (score 5)
+INFO  phase3.render  Shot 43: using fetched image from pexels
+INFO  phase3.render  [render 64%] shot 43/51: broll
+  [███████████████████░░░░░░░░░░░]  64%  shot 43/51: broll                                                     INFO  phase3.render  [render 65%] shot 44/51: typography
+  [███████████████████░░░░░░░░░░░]  65%  shot 44/51: typography                                                INFO  phase3.sources.loc  LoC: 0 candidates for 'Arabic book memoir cover historical documentation archival'
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'Arabic book memoir cover historical documentation archival'
+INFO  phase3.sources.internet_archive  Internet Archive: 0 candidates for 'Arabic book memoir cover historical documentation archival'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'Arabic book memoir cover historical documentation archival'
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on A visually captivating still life featur: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5dH4DNRjCUucwia56XJ'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on A collection of vintage books and pages : Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5dH5iuhWZe51qfLko4h'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Red leather-bound parliamentary books fr: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5dH7GfqEQDFgZGofGDc'} — keeping with neutral score
+INFO  phase3.sources  Shot 45: best=A visually captivating still life featuring a vint (score 5)
+INFO  phase3.render  Shot 45: using fetched image from pexels
+INFO  phase3.render  [render 67%] shot 45/51: object
+  [████████████████████░░░░░░░░░░]  66%  shot 45/51: object                                                    INFO  phase3.sources.loc  LoC: 0 candidates for 'historical documents maps letters Middle East World War One archive'
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'historical documents maps letters Middle East World War One archive'
+INFO  phase3.sources.internet_archive  Internet Archive: 1 candidates for 'historical documents maps letters Middle East World War One archive'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'historical documents maps letters Middle East World War One archive'
+WARNING  phase3.sources.base  Source internet_archive: download failed for https://archive.org/download/majestic-12-files/majestic-12-files.jpg: HTTP Error 404: Not Found
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on A close-up of a vintage map, magnifying : Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5dJFgUAZaQbQTx6hVMJ'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on A nostalgic flat lay combining vintage t: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5dJHNRC8mJNRhyeJTWa'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Close-up view of a vintage handwritten l: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5dJKa8D74Jd4QkEJpU8'} — keeping with neutral score
+INFO  phase3.sources  Shot 46: best=A close-up of a vintage map, magnifying glass, and (score 5)
+INFO  phase3.render  Shot 46: using fetched image from pexels
+INFO  phase3.render  [render 68%] shot 46/51: archive
+  [████████████████████░░░░░░░░░░]  68%  shot 46/51: archive                                                   INFO  phase3.render  [render 70%] shot 47/51: typography
+  [████████████████████░░░░░░░░░░]  69%  shot 47/51: typography                                                INFO  phase3.sources.loc  LoC: 0 candidates for 'Jafar al-Askari portrait Iraqi statesman historical'
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'Jafar al-Askari portrait Iraqi statesman historical'
+INFO  phase3.sources.internet_archive  Internet Archive: 0 candidates for 'Jafar al-Askari portrait Iraqi statesman historical'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'Jafar al-Askari portrait Iraqi statesman historical'
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Vandalized sculpture in a Baghdad park u: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5dLknz1V8eiyWiUnYWA'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on Man in a tuxedo smiling indoors in a lux: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5dLnWRGSZvFSNpTup6m'} — keeping with neutral score
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 400 Bad Request"
+WARNING  phase3.sources.vision  Vision: error on A diverse group of people enjoying a cin: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011Cb5dLpJpXkoZ8TSg1y1E8'} — keeping with neutral score
+INFO  phase3.sources  Shot 48: best=Vandalized sculpture in a Baghdad park under a vib (score 5)
+INFO  phase3.render  Shot 48: using fetched image from pexels
+INFO  phase3.render  [render 71%] shot 48/51: portrait
+  [█████████████████████░░░░░░░░░]  70%  shot 48/51: portrait                                                  INFO  phase3.render  [render 72%] shot 49/51: typography
+  [█████████████████████░░░░░░░░░]  72%  shot 49/51: typography                                                INFO  phase3.render  [render 74%] shot 50/51: typography
+  [██████████████████████░░░░░░░░]  73%  shot 50/51: typography                                                INFO  phase3.render  [render 75%] shot 51/51: title_card
+  [██████████████████████░░░░░░░░]  75%  shot 51/51: title_card                                                INFO  phase3.render  [render 80%] concat all shots
+  [████████████████████████░░░░░░]  80%  concat all shots                                                      INFO  phase3.render  [render 86%] generating captions
+  [█████████████████████████░░░░░]  86%  generating captions                                                   INFO  phase3.render  [render 92%] mux audio and captions
+  [███████████████████████████░░░]  92%  mux audio and captions                                                INFO  phase3.render  [render 100%] done
+  [██████████████████████████████] 100%  done                                                                  
+INFO  phase3.render  Rendered video → output/final_cut.mp4
+
+Done in 1264s  —  output/final_cut.mp4  (25.8 MB)
