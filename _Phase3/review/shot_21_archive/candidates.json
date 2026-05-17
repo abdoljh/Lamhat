@@ -1,0 +1,50 @@
+[
+  {
+    "source": "pexels",
+    "title": "A cozy setting with a cup of tea and Turkish newspaper on a wooden table.",
+    "url": "https://images.pexels.com/photos/19902833/pexels-photo-19902833.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "file": "shot_21_archive/pexels_a.jpg",
+    "score": 8,
+    "score_breakdown": {
+      "subject": 2,
+      "quality": 3,
+      "cinematic": 3
+    },
+    "vision_reason": "Ottoman-era newspaper with tea suggests right period and region for Young Turks context, but specific connection to Jafar al-Askari unclear; superb composition, lighting, and atmospheric depth create ",
+    "width": 6240,
+    "height": 4160,
+    "license_short": "Pexels License"
+  },
+  {
+    "source": "pexels",
+    "title": "A young man wearing eyeglasses reads a vintage newspaper in a rural setting on a sunny day.",
+    "url": "https://images.pexels.com/photos/20220625/pexels-photo-20220625.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "file": "shot_21_archive/pexels_b.jpg",
+    "score": 8,
+    "score_breakdown": {
+      "subject": 2,
+      "quality": 3,
+      "cinematic": 3
+    },
+    "vision_reason": "Period-appropriate newspaper and setting evoke early 20th-century Ottoman era, excellent composition and atmospheric quality, but subject is contemporary person rather than historical figure or archiv",
+    "width": 6240,
+    "height": 4160,
+    "license_short": "Pexels License"
+  },
+  {
+    "source": "pexels",
+    "title": "A candid moment of people reading newspapers on a bench in Ankara park.",
+    "url": "https://images.pexels.com/photos/27967010/pexels-photo-27967010.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "file": "shot_21_archive/pexels_c.jpg",
+    "score": 6,
+    "score_breakdown": {
+      "subject": 2,
+      "quality": 2,
+      "cinematic": 2
+    },
+    "vision_reason": "Contemporary scene of newspaper reading suggests Ottoman-era print culture and public discourse, but lacks specific historical authenticity markers for Young Turks revolution 1908; composition is enga",
+    "width": 7599,
+    "height": 4274,
+    "license_short": "Pexels License"
+  }
+]
