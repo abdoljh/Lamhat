@@ -1,0 +1,12 @@
+Shot 26 — portrait
+Duration: 8.39 s   (timeline 171.98 → 180.37 s)
+Search query (English): Jafar al-Askari 1908 Ottoman officer witness historical
+Spoken / typography excerpt (Arabic): رأى بعينيه كيف يمكن لقوة عسكرية منظمة أن تغيّر مسار دولة بأكملها لكنْ ماذا حدث بعد ذلك؟
+
+Candidates:
+  [pexels          ] score 6/9    A person stands in front of a historic Ottoman-style building in Karaağaç, Edirn
+      → Early 20th-century architectural style is period-appropriate but shows no specific connection to Jafar al-Askari or Otto
+  [pexels          ] score 5/9    Close-up of bronze Ottoman soldier statues in Istanbul, Turkey.
+      → Bronze statues of Ottoman-era military figures match historical period and region, but are generic monuments rather than
+  [pexels          ] score 5/9    Explore an ancient Ottoman cemetery with intricate tombstones in İstanbul, Türki
+      → Ottoman-era cemetery evokes historical period and region but shows no specific connection to Jafar al-Askari; atmospheri
