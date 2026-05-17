@@ -1,0 +1,50 @@
+[
+  {
+    "source": "pexels",
+    "title": "A view of Dolmabahçe Palace in Istanbul showcasing stunning Ottoman architecture along the Bosporus.",
+    "url": "https://images.pexels.com/photos/31875231/pexels-photo-31875231.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "file": "shot_28_broll/pexels_a.jpg",
+    "score": 9,
+    "score_breakdown": {
+      "subject": 3,
+      "quality": 3,
+      "cinematic": 3
+    },
+    "vision_reason": "Dolmabahçe Palace, iconic Ottoman seat of power from the 1910s era, perfectly embodies the institutional grandeur and political intrigue of Jafar al-Askari's time; masterfully composed waterfront shot",
+    "width": 6000,
+    "height": 4000,
+    "license_short": "Pexels License"
+  },
+  {
+    "source": "pexels",
+    "title": "A detailed view of the Beylerbeyi Palace facade, showcasing Ottoman architecture in Istanbul.",
+    "url": "https://images.pexels.com/photos/20523489/pexels-photo-20523489.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "file": "shot_28_broll/pexels_b.jpg",
+    "score": 7,
+    "score_breakdown": {
+      "subject": 2,
+      "quality": 3,
+      "cinematic": 2
+    },
+    "vision_reason": "Grand Ottoman-era architecture fits the 1910s period and regional context of Jafar al-Askari's era, but the building itself is not a confirmed palace or intrigue-specific location; excellent technical",
+    "width": 6000,
+    "height": 4000,
+    "license_short": "Pexels License"
+  },
+  {
+    "source": "pexels",
+    "title": "Ornate gate of Dolmabahçe Palace, Istanbul, showcasing intricate architectural details.",
+    "url": "https://images.pexels.com/photos/10529471/pexels-photo-10529471.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "file": "shot_28_broll/pexels_c.jpg",
+    "score": 8,
+    "score_breakdown": {
+      "subject": 2,
+      "quality": 3,
+      "cinematic": 3
+    },
+    "vision_reason": "Ornate Ottoman palace gate captures the grandeur and architectural ambition of early 1900s Ottoman Empire relevant to Jafar al-Askari's era, though not specific to him personally; technically excellen",
+    "width": 6240,
+    "height": 4160,
+    "license_short": "Pexels License"
+  }
+]
