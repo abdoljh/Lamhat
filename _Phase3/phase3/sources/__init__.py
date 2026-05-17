@@ -56,6 +56,11 @@ class FetcherConfig:
     n_candidates_per_source: int = 3
     enable_vision: bool | None = None   # None = enable iff API key provided
 
+    # Pre-render review dossier (see phase3.sources.decisions).  When set,
+    # the fetcher consults the dossier before doing any source query and
+    # returns the user-approved image when available.
+    review_dir: Path | None = None
+
     @property
     def vision_enabled(self) -> bool:
         if self.enable_vision is False:
@@ -84,6 +89,25 @@ class Fetcher:
             VisionScorer(self.config.anthropic_api_key)
             if self.config.vision_enabled else None
         )
+        # Optional pre-render dossier — loaded lazily so missing/invalid
+        # files don't crash the renderer.
+        self.decisions = None
+        if self.config.review_dir is not None:
+            try:
+                from .decisions import Decisions
+                self.decisions = Decisions.load(self.config.review_dir)
+            except FileNotFoundError as exc:
+                log.warning(
+                    "review_dir=%s but no decisions.json found — "
+                    "ignoring (%s)",
+                    self.config.review_dir, exc,
+                )
+            except Exception as exc:
+                log.warning(
+                    "Failed to load decisions.json from %s: %s — "
+                    "rendering without dossier",
+                    self.config.review_dir, exc,
+                )
 
     # ── Required-images manifest ────────────────────────────────── #
 
@@ -130,7 +154,27 @@ class Fetcher:
         if result.has_image is False).
         """
 
-        # 1. User upload — highest priority, bypasses everything
+        # 0. Review dossier — if the user pre-approved an image (or
+        # dropped an override) for this shot, use it and skip every
+        # source query.
+        if self.decisions is not None:
+            resolved = self.decisions.resolve(
+                shot_index=shot_index,
+                review_dir=self.config.review_dir,
+            )
+            if resolved is not None:
+                cand = ImageCandidate(
+                    url=f"file://{resolved}",
+                    title=f"review-dossier:{resolved.name}",
+                    source="user_upload",
+                    license_short="user-supplied",
+                )
+                cand.local_path = resolved
+                log.info("Shot %d: review-dossier hit %s",
+                         shot_index, resolved.name)
+                return FetchResult(query=query, candidates=[cand], best=cand)
+
+        # 1. User upload — highest priority among non-dossier paths
         user_cand = self.user_source.lookup_for_shot(shot_index, query)
         if user_cand:
             log.info("Shot %d: user-supplied image %s",
