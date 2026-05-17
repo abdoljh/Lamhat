@@ -95,46 +95,129 @@ WARM_GREY    = (140, 130, 115)   # #8C8273 — dividers & ornament
 # Font sizes are expressed as a fraction of video height so they scale
 # from 720p to 1080p to 4K without re-tuning.
 
+# Per-weight filename aliases.  Each weight slot maps to a list of
+# filenames that have appeared in the wild across the various Amiri
+# packagings:
+#   - Upstream releases (≥0.114, 2020-onward): use {Italic, BoldItalic}.
+#   - Older Debian / Ubuntu packages (e.g. fonts-hosny-amiri 0.113-1
+#     on Ubuntu jammy / Colab): ship {Slanted, BoldSlanted} instead.
+# Both name sets refer to the same fonts.  Discovery accepts whichever
+# exists in a given directory.
+_FONT_ALIASES = {
+    "regular":     ["Amiri-Regular.ttf"],
+    "bold":        ["Amiri-Bold.ttf"],
+    "italic":      ["Amiri-Italic.ttf", "Amiri-Slanted.ttf"],
+    "bold_italic": ["Amiri-BoldItalic.ttf", "Amiri-BoldSlanted.ttf"],
+    "quran":       ["AmiriQuran.ttf"],
+}
+
+# Discovery considers a directory usable when *at minimum* regular and
+# bold are present.  italic and bold_italic improve attribution lines
+# under pull quotes but the renderer falls back to regular when they
+# are absent (see _font()).  Quran weight is purely decorative.
+_REQUIRED_WEIGHTS = ("regular", "bold")
+
+
+def _resolve_weights(font_dir: Path) -> dict | None:
+    """Try to satisfy every weight slot from a candidate directory.
+
+    Returns a {weight: absolute path} dict if at least the required
+    weights are present, otherwise None.  Optional weights that aren't
+    present are simply omitted from the result.
+    """
+    resolved: dict[str, Path] = {}
+    for weight, aliases in _FONT_ALIASES.items():
+        for fname in aliases:
+            p = font_dir / fname
+            if p.exists():
+                resolved[weight] = p
+                break
+    if all(w in resolved for w in _REQUIRED_WEIGHTS):
+        return {w: str(p) for w, p in resolved.items()}
+    return None
+
+
 def _discover_amiri_fonts() -> dict:
     """
     Locate the Amiri font files on the current system.
 
-    Discovery order:
-    1. Honor LAMAHAT_AMIRI_DIR env var if set (highest priority).
-    2. Try fontconfig (`fc-match`) — works on any Linux/macOS with fc-cache.
-    3. Walk a list of common install paths covering Debian/Ubuntu,
-       Fedora, Arch, macOS Homebrew, Google Colab, and conda envs.
-    4. Download Amiri from upstream into ~/.cache/lamahat/fonts/.
+    Discovery order, highest-priority first:
+      1. **Repo-bundled `fonts/` directory.**  The Lamahat repo ships
+         `_Phase3/fonts/Amiri-{Regular,Bold,Italic,BoldItalic}.ttf`
+         as the authoritative copies.  Discovery looks there first so
+         renders are reproducible regardless of OS, package version,
+         or network availability.  Probed at, in order:
+           - `<package_parent>/fonts`     (next to `phase3/`)
+           - `<package_parent>/../fonts`  (one level above)
+           - `<CWD>/fonts`                (when invoked from repo root)
+           - `<CWD>/_Phase3/fonts`        (when invoked from repo root)
+      2. `LAMAHAT_AMIRI_DIR` env var (explicit user override).
+      3. `fc-match` (fontconfig) — works on Linux/macOS once `fc-cache`
+         has registered Amiri.
+      4. Well-known install paths covering Debian/Ubuntu, Fedora, Arch,
+         macOS Homebrew, Google Colab `/content/fonts`, conda envs.
+      5. Download from upstream → `~/.cache/lamahat/fonts/`.
+
+    All strategies use `_resolve_weights()`, which accepts both the
+    modern (Italic/BoldItalic) and legacy (Slanted/BoldSlanted) Amiri
+    filename conventions.  Only `regular` + `bold` are strictly
+    required; italic and quran are optional.
 
     Returns
     -------
-    dict with keys 'regular', 'bold', 'italic', 'bold_italic', 'quran'
-    mapped to absolute font paths.
-
-    Raises RuntimeError with installation instructions if nothing works.
+    dict mapping the keys 'regular', 'bold' (always) and optionally
+    'italic', 'bold_italic', 'quran' to absolute font paths.
     """
     import os
     import shutil
     import subprocess
 
-    wanted = {
-        "regular":     "Amiri-Regular.ttf",
-        "bold":        "Amiri-Bold.ttf",
-        "italic":      "Amiri-Italic.ttf",
-        "bold_italic": "Amiri-BoldItalic.ttf",
-        "quran":       "AmiriQuran.ttf",
-    }
+    tried: list[str] = []
 
-    # ── Strategy 1: explicit override ──────────────────────────────── #
+    def _try(label: str, directory: Path) -> dict | None:
+        if not directory or not directory.exists():
+            tried.append(f"  - {label}: {directory} (does not exist)")
+            return None
+        resolved = _resolve_weights(directory)
+        if resolved:
+            log.info("Amiri fonts loaded via %s: %s", label, directory)
+            return resolved
+        tried.append(f"  - {label}: {directory} "
+                     f"(missing required weights regular/bold)")
+        return None
+
+    # ── Strategy 1: repo-bundled fonts/ directory ─────────────────── #
+    # __file__ lives at <repo>/_Phase3/phase3/typography.py, so:
+    #   parents[0] = phase3/
+    #   parents[1] = _Phase3/   ← repo's bundled fonts/ sits here
+    #   parents[2] = <repo root>
+    pkg_dir = Path(__file__).resolve().parent
+    repo_relative_candidates = [
+        ("repo fonts/ (next to phase3)",   pkg_dir.parent / "fonts"),
+        ("repo fonts/ (one level up)",     pkg_dir.parent.parent / "fonts"),
+        ("CWD fonts/",                     Path.cwd() / "fonts"),
+        ("CWD _Phase3/fonts/",             Path.cwd() / "_Phase3" / "fonts"),
+        # Colab convention: notebook copies project root into /content/.
+        # If cell 0 doesn't copy fonts/ but the original is on Drive,
+        # fall through to the live Drive mount.  Cheap when not present.
+        ("Colab Drive /content/_Phase3/fonts",
+         Path("/content/_Phase3/fonts")),
+        ("Colab Drive (mounted) _Phase3/fonts",
+         Path("/content/drive/MyDrive/_Phase3/fonts")),
+    ]
+    for label, d in repo_relative_candidates:
+        found = _try(label, d)
+        if found:
+            return found
+
+    # ── Strategy 2: explicit override ──────────────────────────────── #
     override = os.environ.get("LAMAHAT_AMIRI_DIR")
     if override:
-        d = Path(override)
-        found = {k: d / fname for k, fname in wanted.items()}
-        if all(p.exists() for p in found.values()):
-            log.info("Amiri fonts loaded from LAMAHAT_AMIRI_DIR=%s", d)
-            return {k: str(v) for k, v in found.items()}
+        found = _try("LAMAHAT_AMIRI_DIR env var", Path(override))
+        if found:
+            return found
 
-    # ── Strategy 2: fontconfig ─────────────────────────────────────── #
+    # ── Strategy 3: fontconfig ─────────────────────────────────────── #
     fc_match = shutil.which("fc-match")
     if fc_match:
         try:
@@ -144,25 +227,30 @@ def _discover_amiri_fonts() -> dict:
             )
             if result.returncode == 0 and result.stdout.strip():
                 amiri_regular_path = Path(result.stdout.strip())
-                # Sanity check: fc-match returns *something* even when
-                # the font isn't installed (it picks the closest match).
-                # Reject any path whose filename isn't Amiri-something.
+                # fc-match returns *something* even when Amiri isn't
+                # installed (it picks the closest substitute).  Guard
+                # against accepting a fallback like DejaVu.
                 if "amiri" in amiri_regular_path.name.lower():
-                    font_dir = amiri_regular_path.parent
-                    found = {k: font_dir / fname
-                             for k, fname in wanted.items()}
-                    # Quran variant is optional; allow missing
-                    required = ["regular", "bold", "italic", "bold_italic"]
-                    if all(found[k].exists() for k in required):
-                        log.info("Amiri fonts loaded from %s (via fc-match)",
-                                 font_dir)
-                        return {k: str(v) for k, v in found.items()
-                                if v.exists()}
-        except Exception:
-            pass
+                    found = _try("fc-match", amiri_regular_path.parent)
+                    if found:
+                        return found
+                else:
+                    tried.append(
+                        f"  - fc-match: returned {amiri_regular_path} "
+                        f"(not an Amiri file — fontconfig substituted)"
+                    )
+            else:
+                tried.append(
+                    f"  - fc-match: exit={result.returncode} "
+                    f"stdout={result.stdout.strip()!r}"
+                )
+        except Exception as exc:
+            tried.append(f"  - fc-match: raised {exc!r}")
+    else:
+        tried.append("  - fc-match: binary not on PATH")
 
-    # ── Strategy 3: well-known install paths ───────────────────────── #
-    candidates = [
+    # ── Strategy 4: well-known install paths ───────────────────────── #
+    well_known = [
         # Debian/Ubuntu (fonts-hosny-amiri package)
         Path("/usr/share/fonts/opentype/fonts-hosny-amiri"),
         # Fedora/RHEL
@@ -180,34 +268,43 @@ def _discover_amiri_fonts() -> dict:
         Path.home() / "Library/Fonts",   # macOS
         # Common Colab/notebook environments
         Path("/content/fonts"),
+        Path("/content/_Phase3/fonts"),
         # Conda envs
         Path(os.environ.get("CONDA_PREFIX", "/nonexistent")) / "share/fonts",
     ]
-    for d in candidates:
+    for d in well_known:
         if not d.exists():
             continue
-        # Look for Amiri-Regular.ttf anywhere under this directory
+        # Direct hit first
+        found = _try(f"system path {d}", d)
+        if found:
+            return found
+        # Recursive search — package directories sometimes nest the
+        # fonts under a versioned subdirectory.
         for amiri_regular in d.rglob("Amiri-Regular.ttf"):
-            font_dir = amiri_regular.parent
-            found = {k: font_dir / fname for k, fname in wanted.items()}
-            required = ["regular", "bold", "italic", "bold_italic"]
-            if all(found[k].exists() for k in required):
-                log.info("Amiri fonts loaded from %s", font_dir)
-                return {k: str(v) for k, v in found.items() if v.exists()}
+            found = _try(f"system path (nested) {amiri_regular.parent}",
+                         amiri_regular.parent)
+            if found:
+                return found
 
-    # ── Strategy 4: download from upstream ─────────────────────────── #
-    log.warning("Amiri not found on system — downloading from upstream")
+    # ── Strategy 5: download from upstream ─────────────────────────── #
+    log.warning(
+        "Amiri not found in repo, env override, fontconfig, or system "
+        "paths — falling back to upstream download.  Searched:\n%s",
+        "\n".join(tried) or "  (no paths searched)",
+    )
     return _download_amiri()
 
 
 def _download_amiri() -> dict:
     """
     Download the Amiri font release from the official upstream
-    (github.com/alif-type/amiri) into ~/.cache/lamahat/fonts/.
+    (github.com/aliftype/amiri) into ~/.cache/lamahat/fonts/.
 
-    Only called when no system Amiri is found.  Uses zip release tag
-    1.000 to match the Debian fonts-hosny-amiri package version, so
-    rendering looks identical between local dev and Streamlit Cloud.
+    Last-resort path.  When the repo's bundled `fonts/` directory is
+    present (or any system install is correctly configured), this is
+    never reached.  When it is reached and succeeds, a one-time
+    download caches the fonts so subsequent invocations skip it.
     """
     import io
     import urllib.request
@@ -227,12 +324,13 @@ def _download_amiri() -> dict:
         except Exception as exc:
             raise RuntimeError(
                 f"Amiri font is not installed and could not be downloaded "
-                f"from {url}: {exc}.  Install manually:\n"
+                f"from {url}: {exc}.  Recommended fix: ensure the repo's "
+                f"`_Phase3/fonts/` directory is present at runtime (this is "
+                f"the primary, network-free source).  Alternatives:\n"
                 f"  Debian/Ubuntu: sudo apt install fonts-hosny-amiri\n"
                 f"  Fedora:        sudo dnf install amiri-fonts\n"
                 f"  macOS:         brew install --cask font-amiri\n"
-                f"  Other/Colab:   pip install amiri-font  OR  set "
-                f"LAMAHAT_AMIRI_DIR=/path/to/amiri/ttf/dir"
+                f"  Override:      set LAMAHAT_AMIRI_DIR=/path/to/amiri/ttf/dir"
             ) from exc
 
         with zipfile.ZipFile(io.BytesIO(data)) as zf:
@@ -243,22 +341,15 @@ def _download_amiri() -> dict:
                 if fname.endswith(".ttf"):
                     (cache_dir / fname).write_bytes(zf.read(name))
 
-    wanted = {
-        "regular":     "Amiri-Regular.ttf",
-        "bold":        "Amiri-Bold.ttf",
-        "italic":      "Amiri-Italic.ttf",
-        "bold_italic": "Amiri-BoldItalic.ttf",
-        "quran":       "AmiriQuran.ttf",
-    }
-    found = {k: cache_dir / v for k, v in wanted.items()}
-    missing = [k for k, p in found.items() if not p.exists()]
-    if any(k in missing for k in ["regular", "bold", "italic", "bold_italic"]):
+    resolved = _resolve_weights(cache_dir)
+    if resolved is None:
         raise RuntimeError(
-            f"Downloaded Amiri archive is missing required weights: "
-            f"{missing}.  Please install Amiri manually and retry."
+            f"Downloaded Amiri archive at {cache_dir} is missing the "
+            f"required regular/bold weights.  Files present: "
+            f"{sorted(p.name for p in cache_dir.iterdir())}"
         )
     log.info("Amiri fonts downloaded → %s", cache_dir)
-    return {k: str(p) for k, p in found.items() if p.exists()}
+    return resolved
 
 
 FONT_PATHS = _discover_amiri_fonts()

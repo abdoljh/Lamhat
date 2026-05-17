@@ -568,7 +568,22 @@ def _mux_final(background: Path, out_path: Path,
     if subtitle_path and subtitle_path.exists():
         # FFmpeg filtergraph escaping for paths: : and \ need escaping
         safe = str(subtitle_path).replace("\\", "/").replace(":", "\\:")
-        vf_parts.append(f"ass={safe}")
+        # Pass the Amiri font directory to libass as `fontsdir`.  Without
+        # it, libass falls back to system fontconfig, which on a fresh
+        # Colab/Streamlit-Cloud cold start may not yet have indexed the
+        # Amiri install (or may not have Amiri at all if we resolved it
+        # purely from the repo's bundled fonts/).  In that case libass
+        # substitutes DejaVu Sans, which has no Arabic shaping and
+        # renders captions as boxes.  `fontsdir` short-circuits that.
+        ass_args = [f"ass={safe}"]
+        try:
+            regular = FONT_PATHS.get("regular")
+            if regular:
+                font_dir = str(Path(regular).parent).replace("\\", "/").replace(":", "\\:")
+                ass_args.append(f"fontsdir={font_dir}")
+        except Exception:
+            pass
+        vf_parts.append(":".join(ass_args))
 
     cmd = ["ffmpeg", "-y", "-loglevel", "error", *inputs]
     if vf_parts:
