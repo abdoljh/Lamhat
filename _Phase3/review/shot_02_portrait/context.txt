@@ -1,0 +1,12 @@
+Shot 2 — portrait
+Duration: 4.61 s   (timeline 3.78 → 8.39 s)
+Search query (English): Jafar al-Askari Iraqi general historical portrait 1920s
+Spoken / typography excerpt (Arabic): سلاحاً من أجل تحرير وطنه، لكنه اكتشفَ أنَّ أشرس
+
+Candidates:
+  [pexels          ] score 6/9    Man in a tuxedo smiling indoors in a luxurious, ornate setting in Baghdad.
+      → Modern formal portrait with period styling, sharp and well-composed, but contemporary photography lacks historical authe
+  [pexels          ] score 5/9    Elderly man with gray hair and mustache standing outdoors in a coat with a blurr
+      → Portrait of an older man in period-appropriate clothing against weathered background suggests historical Iraqi subject, 
+  [pexels          ] score 6/9    Yemeni groom posing in traditional attire with rifle, showcasing rich cultural h
+      → Modern theatrical costume performance, not historical documentation of 1920s Iraqi military figure; excellent technical 

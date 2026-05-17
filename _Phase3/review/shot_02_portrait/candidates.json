@@ -1,0 +1,50 @@
+[
+  {
+    "source": "pexels",
+    "title": "Man in a tuxedo smiling indoors in a luxurious, ornate setting in Baghdad.",
+    "url": "https://images.pexels.com/photos/34767814/pexels-photo-34767814.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "file": "shot_02_portrait/pexels_a.jpg",
+    "score": 6,
+    "score_breakdown": {
+      "subject": 1,
+      "quality": 3,
+      "cinematic": 2
+    },
+    "vision_reason": "Modern formal portrait with period styling, sharp and well-composed, but contemporary photography lacks historical authenticity for 1920s Iraqi general documentation",
+    "width": 9504,
+    "height": 6336,
+    "license_short": "Pexels License"
+  },
+  {
+    "source": "pexels",
+    "title": "Elderly man with gray hair and mustache standing outdoors in a coat with a blurred background.",
+    "url": "https://images.pexels.com/photos/11704119/pexels-photo-11704119.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "file": "shot_02_portrait/pexels_b.jpg",
+    "score": 5,
+    "score_breakdown": {
+      "subject": 1,
+      "quality": 2,
+      "cinematic": 2
+    },
+    "vision_reason": "Portrait of an older man in period-appropriate clothing against weathered background suggests historical Iraqi subject, but lacks definitive identification markers for Jafar al-Askari; modern photogra",
+    "width": 6000,
+    "height": 4000,
+    "license_short": "Pexels License"
+  },
+  {
+    "source": "pexels",
+    "title": "Yemeni groom posing in traditional attire with rifle, showcasing rich cultural heritage.",
+    "url": "https://images.pexels.com/photos/17743312/pexels-photo-17743312.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "file": "shot_02_portrait/pexels_c.jpg",
+    "score": 6,
+    "score_breakdown": {
+      "subject": 1,
+      "quality": 3,
+      "cinematic": 2
+    },
+    "vision_reason": "Modern theatrical costume performance, not historical documentation of 1920s Iraqi military figure; excellent technical quality but fundamentally mismatched to documentary subject matter",
+    "width": 6240,
+    "height": 4160,
+    "license_short": "Pexels License"
+  }
+]
