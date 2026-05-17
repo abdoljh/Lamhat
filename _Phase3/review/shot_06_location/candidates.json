@@ -1,0 +1,50 @@
+[
+  {
+    "source": "pexels",
+    "title": "Historic Kuleli Military School on the Bosphorus in Istanbul, Türkiye with seagulls.",
+    "url": "https://images.pexels.com/photos/31756572/pexels-photo-31756572.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "file": "shot_06_location/pexels_a.jpg",
+    "score": 5,
+    "score_breakdown": {
+      "subject": 2,
+      "quality": 2,
+      "cinematic": 1
+    },
+    "vision_reason": "[fail-open] error: Error code: 529 - {'type': 'error', 'error': {'type': 'overloaded_error',",
+    "width": 6000,
+    "height": 4000,
+    "license_short": "Pexels License"
+  },
+  {
+    "source": "pexels",
+    "title": "Fener Greek High School building in Balat, Istanbul, against a sunset sky.",
+    "url": "https://images.pexels.com/photos/34652576/pexels-photo-34652576.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "file": "shot_06_location/pexels_b.jpg",
+    "score": 5,
+    "score_breakdown": {
+      "subject": 2,
+      "quality": 2,
+      "cinematic": 1
+    },
+    "vision_reason": "[fail-open] error: Error code: 529 - {'type': 'error', 'error': {'type': 'overloaded_error',",
+    "width": 6000,
+    "height": 4000,
+    "license_short": "Pexels License"
+  },
+  {
+    "source": "pexels",
+    "title": "A picturesque view of the Hagia Sophia and boats on the Bosphorus in Istanbul.",
+    "url": "https://images.pexels.com/photos/31098363/pexels-photo-31098363.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "file": "shot_06_location/pexels_c.jpg",
+    "score": 7,
+    "score_breakdown": {
+      "subject": 3,
+      "quality": 2,
+      "cinematic": 2
+    },
+    "vision_reason": "Istanbul waterfront with Hagia Sophia and Ottoman architecture matches Constantinople historical query perfectly; slightly soft focus and muted tones reduce technical quality but enhance period docume",
+    "width": 6799,
+    "height": 3824,
+    "license_short": "Pexels License"
+  }
+]

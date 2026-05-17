@@ -1,0 +1,12 @@
+Shot 6 — location
+Duration: 6.38 s   (timeline 26.12 → 32.50 s)
+Search query (English): Constantinople Istanbul Ottoman military academy historical 1900s
+Spoken / typography excerpt (Arabic): العثمانية وميلاد الحركة القومية العربية، وترك لنا سجلاً دقيقاً
+
+Candidates:
+  [pexels          ] score 5/9    Historic Kuleli Military School on the Bosphorus in Istanbul, Türkiye with seagu
+      → [fail-open] error: Error code: 529 - {'type': 'error', 'error': {'type': 'overloaded_error',
+  [pexels          ] score 5/9    Fener Greek High School building in Balat, Istanbul, against a sunset sky.
+      → [fail-open] error: Error code: 529 - {'type': 'error', 'error': {'type': 'overloaded_error',
+  [pexels          ] score 7/9    A picturesque view of the Hagia Sophia and boats on the Bosphorus in Istanbul.
+      → Istanbul waterfront with Hagia Sophia and Ottoman architecture matches Constantinople historical query perfectly; slight
