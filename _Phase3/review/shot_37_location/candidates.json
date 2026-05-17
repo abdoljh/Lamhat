@@ -1,0 +1,50 @@
+[
+  {
+    "source": "pexels",
+    "title": "View of the architectural beauty of Ghardaïa, famous for its unique M'zab Valley structures.",
+    "url": "https://images.pexels.com/photos/9254283/pexels-photo-9254283.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "file": "shot_37_location/pexels_a.jpg",
+    "score": 8,
+    "score_breakdown": {
+      "subject": 2,
+      "quality": 3,
+      "cinematic": 3
+    },
+    "vision_reason": "Historic North African Islamic architecture with desert setting matches documentary context of WWI-era region, though no specific Senussi or al-Askari reference visible; exceptional clarity and compos",
+    "width": 6720,
+    "height": 4480,
+    "license_short": "Pexels License"
+  },
+  {
+    "source": "pexels",
+    "title": "Explore the iconic desert landscape of the Star Wars Tatooine set, with arid sand dunes and unique rock formations.",
+    "url": "https://images.pexels.com/photos/34328971/pexels-photo-34328971.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "file": "shot_37_location/pexels_b.jpg",
+    "score": 8,
+    "score_breakdown": {
+      "subject": 2,
+      "quality": 3,
+      "cinematic": 3
+    },
+    "vision_reason": "Authentic North African desert architecture and landscape perfectly suited to WWI Libyan historical context, though no specific Senussi or al-Askari indicators visible; striking composition with excel",
+    "width": 6240,
+    "height": 4160,
+    "license_short": "Pexels License"
+  },
+  {
+    "source": "pexels",
+    "title": "Capture of the iconic Pyramids of Giza showcasing their grandeur under a moody sky with distant camel riders.",
+    "url": "https://images.pexels.com/photos/35807896/pexels-photo-35807896.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "file": "shot_37_location/pexels_c.jpg",
+    "score": 5,
+    "score_breakdown": {
+      "subject": 1,
+      "quality": 2,
+      "cinematic": 2
+    },
+    "vision_reason": "Pyramids suggest North Africa/Egypt but not specifically Libya or WWI Senussi context; well-composed landscape with atmospheric sky, but generic desert tourism scene lacking historical specificity",
+    "width": 6240,
+    "height": 4160,
+    "license_short": "Pexels License"
+  }
+]

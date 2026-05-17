@@ -1,0 +1,12 @@
+Shot 37 — location
+Duration: 7.09 s   (timeline 259.68 → 266.77 s)
+Search query (English): North Africa Libyan desert Senussi movement World War One historical
+Spoken / typography excerpt (Arabic): معقدة في ظروف قاسية وضغوط هائلة المذكرات تروي بتفاصيل دقيقة كيفية إدارة
+
+Candidates:
+  [pexels          ] score 8/9    View of the architectural beauty of Ghardaïa, famous for its unique M'zab Valley
+      → Historic North African Islamic architecture with desert setting matches documentary context of WWI-era region, though no
+  [pexels          ] score 8/9    Explore the iconic desert landscape of the Star Wars Tatooine set, with arid san
+      → Authentic North African desert architecture and landscape perfectly suited to WWI Libyan historical context, though no s
+  [pexels          ] score 5/9    Capture of the iconic Pyramids of Giza showcasing their grandeur under a moody s
+      → Pyramids suggest North Africa/Egypt but not specifically Libya or WWI Senussi context; well-composed landscape with atmo
