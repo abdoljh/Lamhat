@@ -1,0 +1,12 @@
+Shot 24 — archive
+Duration: 8.51 s   (timeline 155.08 → 163.59 s)
+Search query (English): Ottoman coup 1908 revolution Abdulhamid II historical photograph Istanbul
+Spoken / typography excerpt (Arabic): الاتحاد والترقي يُنَظَّمُ في الظل، وكانت انقلابات ومكائد تحاك في كل زاوية انقلاب ١٩٠٨
+
+Candidates:
+  [pexels          ] score 7/9    People enjoying a sunny day at the historic German Fountain, Istanbul, Türkiye.
+      → Ottoman-era architecture in Istanbul, correct historical period and region for the Young Turk Revolution context, but th
+  [pexels          ] score 7/9    Explore the historic architecture of İstanbul, Türkiye showcasing the iconic Leg
+      → Ottoman-era Istanbul architecture perfectly period-appropriate and geographically correct for 1908 revolution context, b
+  [pexels          ] score 8/9    Ottoman architecture of Legacy Ottoman Hotel highlighted by golden sunset light,
+      → Ottoman-era Islamic architecture from Istanbul matches the historical period and region of the 1908 revolution and Jafar
