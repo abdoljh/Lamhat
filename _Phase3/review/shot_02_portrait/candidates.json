@@ -1,15 +1,59 @@
 [
   {
+    "source": "user_upload",
+    "title": "Jafar al-Askari — personal photograph #1 (formal portrait)",
+    "url": "file://shot_02_portrait/my_jafar_1.jpg",
+    "file": "shot_02_portrait/my_jafar_1.jpg",
+    "score": 9,
+    "score_breakdown": { "subject": 3, "quality": 3, "cinematic": 3 },
+    "vision_reason": "User-supplied authoritative photograph of the documentary subject.",
+    "width": 921,
+    "height": 1152,
+    "license_short": "user-supplied"
+  },
+  {
+    "source": "user_upload",
+    "title": "Jafar al-Askari — personal photograph #2",
+    "url": "file://shot_02_portrait/my_jafar_2.jpg",
+    "file": "shot_02_portrait/my_jafar_2.jpg",
+    "score": 9,
+    "score_breakdown": { "subject": 3, "quality": 3, "cinematic": 3 },
+    "vision_reason": "User-supplied authoritative photograph of the documentary subject.",
+    "width": 393,
+    "height": 603,
+    "license_short": "user-supplied"
+  },
+  {
+    "source": "user_upload",
+    "title": "Jafar al-Askari — personal photograph #3",
+    "url": "file://shot_02_portrait/my_jafar_3.jpg",
+    "file": "shot_02_portrait/my_jafar_3.jpg",
+    "score": 9,
+    "score_breakdown": { "subject": 3, "quality": 3, "cinematic": 3 },
+    "vision_reason": "User-supplied authoritative photograph of the documentary subject.",
+    "width": 832,
+    "height": 1261,
+    "license_short": "user-supplied"
+  },
+  {
+    "source": "user_upload",
+    "title": "Jafar al-Askari — personal photograph #3a (preferred)",
+    "url": "file://shot_02_portrait/my_jafar_3a.jpg",
+    "file": "shot_02_portrait/my_jafar_3a.jpg",
+    "score": 9,
+    "score_breakdown": { "subject": 3, "quality": 3, "cinematic": 3 },
+    "vision_reason": "User-supplied authoritative photograph of the documentary subject. Marked as the preferred selection.",
+    "width": 896,
+    "height": 1169,
+    "license_short": "user-supplied"
+  },
+  {
     "source": "pexels",
     "title": "Man in a tuxedo smiling indoors in a luxurious, ornate setting in Baghdad.",
     "url": "https://images.pexels.com/photos/34767814/pexels-photo-34767814.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
     "file": "shot_02_portrait/pexels_a.jpg",
     "score": 6,
-    "score_breakdown": {
-      "subject": 1,
-      "quality": 3,
-      "cinematic": 2
-    },
+    "score_breakdown": { "subject": 1, "quality": 3, "cinematic": 2 },
     "vision_reason": "Modern formal portrait with period styling, sharp and well-composed, but contemporary photography lacks historical authenticity for 1920s Iraqi general documentation",
     "width": 9504,
     "height": 6336,
@@ -21,12 +65,8 @@
     "url": "https://images.pexels.com/photos/11704119/pexels-photo-11704119.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
     "file": "shot_02_portrait/pexels_b.jpg",
     "score": 5,
-    "score_breakdown": {
-      "subject": 1,
-      "quality": 2,
-      "cinematic": 2
-    },
-    "vision_reason": "Portrait of an older man in period-appropriate clothing against weathered background suggests historical Iraqi subject, but lacks definitive identification markers for Jafar al-Askari; modern photogra",
+    "score_breakdown": { "subject": 1, "quality": 2, "cinematic": 2 },
+    "vision_reason": "Portrait of an older man in period-appropriate clothing against weathered background suggests historical Iraqi subject, but lacks definitive identification markers for Jafar al-Askari; modern photography",
     "width": 6000,
     "height": 4000,
     "license_short": "Pexels License"
@@ -37,11 +77,7 @@
     "url": "https://images.pexels.com/photos/17743312/pexels-photo-17743312.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
     "file": "shot_02_portrait/pexels_c.jpg",
     "score": 6,
-    "score_breakdown": {
-      "subject": 1,
-      "quality": 3,
-      "cinematic": 2
-    },
+    "score_breakdown": { "subject": 1, "quality": 3, "cinematic": 2 },
     "vision_reason": "Modern theatrical costume performance, not historical documentation of 1920s Iraqi military figure; excellent technical quality but fundamentally mismatched to documentary subject matter",
     "width": 6240,
     "height": 4160,
