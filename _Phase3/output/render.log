@@ -1,0 +1,124 @@
+
+Plan   : output/al_askari_plan_v2.json  (48 shots)
+Audio  : output/al_askari_audio.mp3
+Output : output/final_cut.mp4
+Config : 1920×1080 @ 25 fps  captions=on
+Vision : on  Cache: on  User dir: –  Book extracts: –
+Review : output/review/ (dossier consulted before fetcher)
+
+INFO  phase3.sources.decisions  Decisions loaded from output/review/decisions.json: 24 shots, pinned_portrait=overrides/character.jpg
+INFO  phase3.render  [render 6%] shot 1/48: title_card
+  [█░░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   6%  shot 1/48: title_card                                                 INFO  phase3.render  [render 8%] shot 2/48: typography
+  [██░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   7%  shot 2/48: typography                                                 INFO  phase3.sources  Shot 3: review-dossier hit pexels_b.jpg
+INFO  phase3.render  Shot 3: using fetched image from user_upload
+INFO  phase3.render  [render 9%] shot 3/48: archive
+  [██░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   9%  shot 3/48: archive                                                    INFO  phase3.render  [render 11%] shot 4/48: typography
+  [███░░░░░░░░░░░░░░░░░░░░░░░░░░░]  10%  shot 4/48: typography                                                 INFO  phase3.sources  Shot 5: review-dossier hit character.jpg
+INFO  phase3.render  Shot 5: using fetched image from user_upload
+INFO  phase3.render  [render 12%] shot 5/48: portrait
+  [███░░░░░░░░░░░░░░░░░░░░░░░░░░░]  12%  shot 5/48: portrait                                                   INFO  phase3.sources  Shot 6: review-dossier hit pexels_c.jpg
+INFO  phase3.render  Shot 6: using fetched image from user_upload
+INFO  phase3.render  [render 14%] shot 6/48: archive
+  [████░░░░░░░░░░░░░░░░░░░░░░░░░░]  13%  shot 6/48: archive                                                    INFO  phase3.render  [render 15%] shot 7/48: typography
+  [████░░░░░░░░░░░░░░░░░░░░░░░░░░]  15%  shot 7/48: typography                                                 INFO  phase3.sources  Shot 8: review-dossier hit pexels_a.jpg
+INFO  phase3.render  Shot 8: using fetched image from user_upload
+INFO  phase3.render  [render 17%] shot 8/48: location
+  [█████░░░░░░░░░░░░░░░░░░░░░░░░░]  16%  shot 8/48: location                                                   INFO  phase3.render  [render 18%] shot 9/48: section_mark
+  [█████░░░░░░░░░░░░░░░░░░░░░░░░░]  18%  shot 9/48: section_mark                                               INFO  phase3.sources  Shot 10: review-dossier hit pexels_b.jpg
+INFO  phase3.render  Shot 10: using fetched image from user_upload
+INFO  phase3.render  [render 20%] shot 10/48: location
+  [█████░░░░░░░░░░░░░░░░░░░░░░░░░]  19%  shot 10/48: location                                                  INFO  phase3.sources  Shot 11: review-dossier hit pexels_a.jpg
+INFO  phase3.render  Shot 11: using fetched image from user_upload
+INFO  phase3.render  [render 21%] shot 11/48: location
+  [██████░░░░░░░░░░░░░░░░░░░░░░░░]  21%  shot 11/48: location                                                  INFO  phase3.render  [render 22%] shot 12/48: typography
+  [██████░░░░░░░░░░░░░░░░░░░░░░░░]  22%  shot 12/48: typography                                                INFO  phase3.sources  Shot 13: review-dossier hit pexels_c.jpg
+INFO  phase3.render  Shot 13: using fetched image from user_upload
+INFO  phase3.render  [render 24%] shot 13/48: archive
+  [███████░░░░░░░░░░░░░░░░░░░░░░░]  23%  shot 13/48: archive                                                   INFO  phase3.sources  Shot 14: review-dossier hit pexels_a.jpg
+INFO  phase3.render  Shot 14: using fetched image from user_upload
+INFO  phase3.render  [render 25%] shot 14/48: broll
+  [███████░░░░░░░░░░░░░░░░░░░░░░░]  25%  shot 14/48: broll                                                     INFO  phase3.render  [render 27%] shot 15/48: typography
+  [████████░░░░░░░░░░░░░░░░░░░░░░]  26%  shot 15/48: typography                                                INFO  phase3.sources  Shot 16: review-dossier hit character.jpg
+INFO  phase3.render  Shot 16: using fetched image from user_upload
+INFO  phase3.render  [render 28%] shot 16/48: portrait
+  [████████░░░░░░░░░░░░░░░░░░░░░░]  28%  shot 16/48: portrait                                                  INFO  phase3.sources  Shot 17: review-dossier hit pexels_a.jpg
+INFO  phase3.render  Shot 17: using fetched image from user_upload
+INFO  phase3.render  [render 30%] shot 17/48: archive
+  [████████░░░░░░░░░░░░░░░░░░░░░░]  29%  shot 17/48: archive                                                   INFO  phase3.render  [render 31%] shot 18/48: typography
+  [█████████░░░░░░░░░░░░░░░░░░░░░]  31%  shot 18/48: typography                                                INFO  phase3.sources  Shot 19: review-dossier hit pexels_b.jpg
+INFO  phase3.render  Shot 19: using fetched image from user_upload
+INFO  phase3.render  [render 33%] shot 19/48: broll
+  [█████████░░░░░░░░░░░░░░░░░░░░░]  32%  shot 19/48: broll                                                     INFO  phase3.render  [render 34%] shot 20/48: section_mark
+  [██████████░░░░░░░░░░░░░░░░░░░░]  34%  shot 20/48: section_mark                                              INFO  phase3.sources  Shot 21: review-dossier hit pexels_b.jpg
+INFO  phase3.render  Shot 21: using fetched image from user_upload
+INFO  phase3.render  [render 36%] shot 21/48: location
+  [██████████░░░░░░░░░░░░░░░░░░░░]  35%  shot 21/48: location                                                  INFO  phase3.sources  Shot 22: review-dossier hit pexels_a.jpg
+INFO  phase3.render  Shot 22: using fetched image from user_upload
+INFO  phase3.render  [render 37%] shot 22/48: archive
+  [███████████░░░░░░░░░░░░░░░░░░░]  37%  shot 22/48: archive                                                   INFO  phase3.render  [render 39%] shot 23/48: typography
+  [███████████░░░░░░░░░░░░░░░░░░░]  38%  shot 23/48: typography                                                INFO  phase3.sources  Shot 24: review-dossier hit pexels_b.jpg
+INFO  phase3.render  Shot 24: using fetched image from user_upload
+INFO  phase3.render  [render 40%] shot 24/48: archive
+  [███████████░░░░░░░░░░░░░░░░░░░]  39%  shot 24/48: archive                                                   INFO  phase3.render  [render 41%] shot 25/48: typography
+  [████████████░░░░░░░░░░░░░░░░░░]  41%  shot 25/48: typography                                                INFO  phase3.sources  Shot 26: review-dossier hit character.jpg
+INFO  phase3.render  Shot 26: using fetched image from user_upload
+INFO  phase3.render  [render 43%] shot 26/48: portrait
+  [████████████░░░░░░░░░░░░░░░░░░]  42%  shot 26/48: portrait                                                  INFO  phase3.render  [render 44%] shot 27/48: typography
+  [█████████████░░░░░░░░░░░░░░░░░]  44%  shot 27/48: typography                                                INFO  phase3.sources  Shot 28: review-dossier hit pexels_a.jpg
+INFO  phase3.render  Shot 28: using fetched image from user_upload
+INFO  phase3.render  [render 46%] shot 28/48: broll
+  [█████████████░░░░░░░░░░░░░░░░░]  45%  shot 28/48: broll                                                     INFO  phase3.render  [render 47%] shot 29/48: typography
+  [██████████████░░░░░░░░░░░░░░░░]  47%  shot 29/48: typography                                                INFO  phase3.render  [render 49%] shot 30/48: section_mark
+  [██████████████░░░░░░░░░░░░░░░░]  48%  shot 30/48: section_mark                                              INFO  phase3.sources  Shot 31: review-dossier hit pexels_b.jpg
+INFO  phase3.render  Shot 31: using fetched image from user_upload
+INFO  phase3.render  [render 50%] shot 31/48: archive
+  [███████████████░░░░░░░░░░░░░░░]  50%  shot 31/48: archive                                                   INFO  phase3.render  [render 52%] shot 32/48: typography
+  [███████████████░░░░░░░░░░░░░░░]  51%  shot 32/48: typography                                                INFO  phase3.sources  Shot 33: review-dossier hit pexels_a.jpg
+INFO  phase3.render  Shot 33: using fetched image from user_upload
+INFO  phase3.render  [render 53%] shot 33/48: location
+  [███████████████░░░░░░░░░░░░░░░]  53%  shot 33/48: location                                                  INFO  phase3.sources  Shot 34: review-dossier hit pexels_c.jpg
+INFO  phase3.render  Shot 34: using fetched image from user_upload
+INFO  phase3.render  [render 55%] shot 34/48: archive
+  [████████████████░░░░░░░░░░░░░░]  54%  shot 34/48: archive                                                   INFO  phase3.render  [render 56%] shot 35/48: typography
+  [████████████████░░░░░░░░░░░░░░]  56%  shot 35/48: typography                                                INFO  phase3.sources  Shot 36: review-dossier hit character.jpg
+INFO  phase3.render  Shot 36: using fetched image from user_upload
+INFO  phase3.render  [render 58%] shot 36/48: portrait
+  [█████████████████░░░░░░░░░░░░░]  57%  shot 36/48: portrait                                                  INFO  phase3.render  [render 59%] shot 37/48: typography
+  [█████████████████░░░░░░░░░░░░░]  58%  shot 37/48: typography                                                INFO  phase3.render  [render 60%] shot 38/48: section_mark
+  [██████████████████░░░░░░░░░░░░]  60%  shot 38/48: section_mark                                              INFO  phase3.sources  Shot 39: review-dossier hit pexels_a.jpg
+INFO  phase3.render  Shot 39: using fetched image from user_upload
+INFO  phase3.render  [render 62%] shot 39/48: object
+  [██████████████████░░░░░░░░░░░░]  61%  shot 39/48: object                                                    INFO  phase3.render  [render 63%] shot 40/48: typography
+  [███████████████████░░░░░░░░░░░]  63%  shot 40/48: typography                                                INFO  phase3.sources  Shot 41: review-dossier hit character.jpg
+INFO  phase3.render  Shot 41: using fetched image from user_upload
+INFO  phase3.render  [render 65%] shot 41/48: portrait
+  [███████████████████░░░░░░░░░░░]  64%  shot 41/48: portrait                                                  INFO  phase3.sources  Shot 42: review-dossier hit pexels_c.jpg
+INFO  phase3.render  Shot 42: using fetched image from user_upload
+INFO  phase3.render  [render 66%] shot 42/48: archive
+  [███████████████████░░░░░░░░░░░]  66%  shot 42/48: archive                                                   INFO  phase3.render  [render 68%] shot 43/48: typography
+  [████████████████████░░░░░░░░░░]  67%  shot 43/48: typography                                                INFO  phase3.sources.loc  LoC: 0 candidates for 'historical maps letters documents Middle East archive World War One'
+INFO  phase3.sources.wikimedia  Wikimedia: 0 candidates for 'historical maps letters documents Middle East archive World War One'
+INFO  phase3.sources.internet_archive  Internet Archive: 1 candidates for 'historical maps letters documents Middle East archive World War One'
+INFO  phase3.sources.pexels  Pexels: 3 candidates for 'historical maps letters documents Middle East archive World War One'
+WARNING  phase3.sources.base  Source internet_archive: download failed for https://archive.org/download/majestic-12-files/majestic-12-files.jpg: HTTP Error 404: Not Found
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+INFO  phase3.sources.vision  Vision 3/3/3  A close-up of a vintage map, magnifying   — Authentic historical map with magnifying glass, notebook, an
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+INFO  phase3.sources.vision  Vision 3/3/3  A nostalgic flat lay combining vintage t  — Perfectly curated flatlay of WWI-era artifacts including vin
+INFO  httpx  HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+INFO  phase3.sources.vision  Vision 3/2/2  Colorful world map close-up showing Afri  — Historical map of Middle East region with period-appropriate
+INFO  phase3.sources  Shot 44: best=A close-up of a vintage map, magnifying glass, and (score 9)
+INFO  phase3.render  Shot 44: using fetched image from pexels
+INFO  phase3.render  [render 69%] shot 44/48: object
+  [████████████████████░░░░░░░░░░]  69%  shot 44/48: object                                                    INFO  phase3.render  [render 71%] shot 45/48: typography
+  [█████████████████████░░░░░░░░░]  70%  shot 45/48: typography                                                INFO  phase3.render  [render 72%] shot 46/48: typography
+  [█████████████████████░░░░░░░░░]  72%  shot 46/48: typography                                                INFO  phase3.render  [render 74%] shot 47/48: typography
+  [██████████████████████░░░░░░░░]  73%  shot 47/48: typography                                                INFO  phase3.render  [render 75%] shot 48/48: title_card
+  [██████████████████████░░░░░░░░]  74%  shot 48/48: title_card                                                INFO  phase3.render  [render 80%] concat all shots
+  [████████████████████████░░░░░░]  80%  concat all shots                                                      INFO  phase3.render  [render 86%] generating captions
+  [█████████████████████████░░░░░]  86%  generating captions                                                   INFO  phase3.render  [render 92%] mux audio and captions
+  [███████████████████████████░░░]  92%  mux audio and captions                                                INFO  phase3.render  [render 100%] done
+  [██████████████████████████████] 100%  done                                                                  
+INFO  phase3.render  Rendered video → output/final_cut.mp4
+
+Done in 630s  —  output/final_cut.mp4  (25.8 MB)
